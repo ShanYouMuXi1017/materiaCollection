@@ -1,0 +1,67 @@
+version: '1.0'
+name: pipeline-20220519
+displayName: pipeline-20220519
+triggers:
+  trigger: manual
+  push:
+    branches:
+      prefix:
+        - ''
+stages:
+  - name: stage-f911a4d4
+    displayName: 编译
+    strategy: naturally
+    trigger: auto
+    executor: []
+    steps:
+      - step: build@nodejs
+        name: build_nodejs
+        displayName: Nodejs 构建
+        nodeVersion: 14.16.0
+        commands:
+          - '# 设置NPM源，提升安装速度'
+          - ''
+          - npm config set registry https://registry.npmmirror.com
+          - ''
+          - ''
+          - ''
+          - '# 执行编译命令'
+          - ''
+          - npm install && npm run build
+        artifacts:
+          - name: BUILD_ARTIFACT
+            path:
+              - ./dist
+        caches:
+          - ~/.npm
+          - ~/.yarn
+        strategy:
+          retry: '0'
+  - name: stage-dbe565b9
+    displayName: 部署
+    strategy: naturally
+    trigger: auto
+    executor: []
+    steps:
+      - step: deploy@agent
+        name: deploy_agent
+        displayName: 主机部署
+        hostGroupID:
+          ID: qiwen
+          hostID:
+            - 4e449710-088b-4e36-acd7-bcf7958ffcda
+        deployArtifact:
+          - source: build
+            name: qiwen-file-web
+            target: ~/gitee_go/deploy/qiwen-file-web
+            dependArtifact: BUILD_ARTIFACT
+        script:
+          - '# 请在此输入部署脚本，如启动Java应用如下'
+          - '# nohup java -jar test.jar > nohup.out &'
+          - cd ~/gitee_go/deploy/qiwen-file-web
+          - tar -zxvf qiwen-file-web.tar.gz
+          - rm -rf /home/html/file
+          - cp -r dist /home/html/file
+          - ' echo ''Hello Gitee!'''
+        strategy:
+          retry: '0'
