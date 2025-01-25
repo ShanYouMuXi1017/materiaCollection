@@ -6,48 +6,50 @@
 			:src="logoUrlXs"
 			@click="$router.push({ name: 'Home' })"
 		/>
+
 		<el-menu
 			:default-active="activeIndex"
-			class="top-menu-list"
+			class="el-menu-demo"
 			mode="horizontal"
-			@select="menuItemClick"
+			@select="handleSelect"
 		>
 			<el-menu-item index="Home">首页</el-menu-item>
-			<el-menu-item index="File">网盘</el-menu-item>
-			<li class="el-menu-item external-link">
-        <a href="https://pan.qiwenshare.com/docs/" target="_blank">文档</a>
-			</li>
-			<template v-if="isLogin">
-				<el-submenu
-					class="user-exit-submenu"
-					index="User"
-					v-if="screenWidth <= 768"
+			<el-menu-item index="File">材料管理</el-menu-item>
+			<!-- <el-menu-item index="File">个人网盘</el-menu-item> -->
+			<el-menu-item index="4"
+				><a href="https://pan.qiwenshare.com/docs/" target="_blank"
+					>文档</a
+				></el-menu-item
+			>
+		</el-menu>
+		<el-menu
+			:default-active="activeIndex"
+			class="el-menu-demo"
+			mode="horizontal"
+			style="position: absolute; right: 0"
+			@select="handleSelect"
+		>
+			<template>
+				<el-menu-item class="login" index="Login" v-show="!isLogin"
+					>登录</el-menu-item
 				>
+				<el-menu-item class="register" v-show="!isLogin" index="Register"
+					>注册</el-menu-item
+				>
+			</template>
+			<template>
+				<!-- <div class="el-menu-item exit" @click="exitButton()">退出</div> -->
+				<el-submenu class="user-exit-submenu" index="User" v-show="isLogin">
 					<template slot="title">
 						<i class="el-icon-user-solid"></i>
 						<span>{{ username }}</span>
 					</template>
+					<el-menu-item>个人信息</el-menu-item>
 					<el-menu-item @click="exitButton()">退出</el-menu-item>
 				</el-submenu>
-				<template v-else>
-					<!-- 为了和其他菜单样式保持一致，请一定要添加类名 el-menu-item -->
-					<div class="el-menu-item exit" @click="exitButton()">退出</div>
-					<div class="el-menu-item username" v-show="isLogin">
-						<i class="el-icon-user-solid"></i> <span>{{ username }}</span>
-					</div>
-				</template>
 			</template>
-
-			<!-- 开发环境 -->
-			<el-menu-item class="login" index="Login" v-show="!isLogin"
-				>登录</el-menu-item
-			>
-
-			<!-- 开发环境 -->
-			<el-menu-item class="register" v-show="!isLogin" index="Register"
-				>注册</el-menu-item
-			>
 		</el-menu>
+		<div class="line"></div>
 	</div>
 </template>
 
@@ -96,7 +98,7 @@ export default {
 			})
 		},
 
-		menuItemClick(key) {
+		handleSelect(key) {
 			if (key === 'exit') {
 				this.exitButton()
 			} else if (key === 'Login') {
@@ -129,37 +131,30 @@ export default {
   padding: 0 20px;
   box-shadow: $tabBoxShadow;
   display: flex;
-
   .logo {
     margin: 14px 24px 0 24px;
     display: inline-block;
     height: 40px;
     cursor: pointer;
   }
-
   .logo-xs {
     display: none;
   }
-
   >>> .el-menu--horizontal {
     .el-menu-item:not(.is-disabled):hover {
       border-bottom-color: $Primary !important;
       background: $tabBackColor;
     }
-
     .external-link {
       padding: 0;
       a {
         display: inline-block;
         padding: 0 20px;
       }
- 
     }
   }
-
   .top-menu-list {
     flex: 1;
-
     .login, .register, .username, .exit, .user-exit-submenu {
       float: right;
     }
