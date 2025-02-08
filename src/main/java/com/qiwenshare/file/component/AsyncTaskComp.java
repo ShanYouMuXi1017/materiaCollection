@@ -6,9 +6,13 @@ import com.qiwenshare.file.api.IFiletransferService;
 import com.qiwenshare.file.api.IRecoveryFileService;
 import com.qiwenshare.file.api.IUserFileService;
 import com.qiwenshare.file.domain.FileBean;
+import com.qiwenshare.file.domain.PublicBean;
+import com.qiwenshare.file.domain.PublicFile;
 import com.qiwenshare.file.domain.UserFile;
 import com.qiwenshare.file.io.QiwenFile;
 import com.qiwenshare.file.mapper.FileMapper;
+import com.qiwenshare.file.mapper.PublicFileMapper;
+import com.qiwenshare.file.mapper.PublicMapper;
 import com.qiwenshare.file.mapper.UserFileMapper;
 import com.qiwenshare.ufop.factory.UFOPFactory;
 import com.qiwenshare.ufop.operation.copy.domain.CopyFile;
@@ -50,6 +54,15 @@ public class AsyncTaskComp {
     UserFileMapper userFileMapper;
     @Resource
     FileMapper fileMapper;
+
+    @Resource
+    PublicMapper publicMapper;
+
+    @Resource
+    PublicFileMapper publicFileMapper;
+
+    @Resource
+    PublicDealComp publicDealComp;
     @Resource
     FileDealComp fileDealComp;
 
@@ -193,5 +206,85 @@ public class AsyncTaskComp {
         return new AsyncResult<>("saveUnzipFile");
     }
 
+
+
+    // 公共区域解压缩
+    public Future<String> saveUnzipPublic(PublicFile userFile, PublicBean fileBean, int unzipMode, String entryName, String filePath) {
+        String unzipUrl = UFOPUtils.getTempFile(fileBean.getFileUrl()).getAbsolutePath().replace("." + userFile.getExtendName(), "");
+        String totalFileUrl = unzipUrl + entryName;
+        File currentFile = new File(totalFileUrl);
+
+        String fileId = null;
+        if (!currentFile.isDirectory()) {
+
+            FileInputStream fis = null;
+            String md5Str = UUID.randomUUID().toString();
+            try {
+                fis = new FileInputStream(currentFile);
+                md5Str = DigestUtils.md5Hex(fis);
+            } catch (IOException e) {
+                e.printStackTrace();
+            } finally {
+                IOUtils.closeQuietly(fis);
+            }
+
+            FileInputStream fileInputStream = null;
+            try {
+                Map<String, Object> param = new HashMap<>();
+                param.put("identifier", md5Str);
+                List<PublicBean> list = publicMapper.selectByMap(param);
+
+                if (list != null && !list.isEmpty()) { //文件已存在
+                    fileId = list.get(0).getFileId();
+                } else { //文件不存在
+                    fileInputStream = new FileInputStream(currentFile);
+                    CopyFile createFile = new CopyFile();
+                    createFile.setExtendName(FilenameUtils.getExtension(totalFileUrl));
+                    String saveFileUrl = ufopFactory.getCopier().copy(fileInputStream, createFile);
+
+                    PublicBean tempFileBean = new PublicBean(saveFileUrl, currentFile.length(), storageType, md5Str, userFile.getUserId());
+
+                    publicMapper.insert(tempFileBean);
+                    fileId = tempFileBean.getFileId();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            } finally {
+                IOUtils.closeQuietly(fileInputStream);
+                System.gc();
+                try {
+                    Thread.sleep(100);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                currentFile.delete();
+            }
+
+
+        }
+
+
+        QiwenFile qiwenFile = null;
+        if (unzipMode == 0) {
+            qiwenFile = new QiwenFile(userFile.getFilePath(), entryName, currentFile.isDirectory());
+        } else if (unzipMode == 1) {
+            qiwenFile = new QiwenFile(userFile.getFilePath() + "/" + userFile.getFileName(), entryName, currentFile.isDirectory());
+        } else if (unzipMode == 2) {
+            qiwenFile = new QiwenFile(filePath, entryName, currentFile.isDirectory());
+        }
+
+        PublicFile saveUserFile = new PublicFile(qiwenFile, userFile.getUserId(), fileId);
+        String fileName = publicDealComp.getRepeatFileName(saveUserFile, saveUserFile.getFilePath());
+
+        if (saveUserFile.getIsDir() == 1 && !fileName.equals(saveUserFile.getFileName())) {
+            //如果是目录，而且重复，什么也不做
+        } else {
+            saveUserFile.setFileName(fileName);
+            publicFileMapper.insert(saveUserFile);
+        }
+        publicDealComp.restoreParentFilePath(qiwenFile, userFile.getUserId());
+
+        return new AsyncResult<>("saveUnzipFile");
+    }
 
 }

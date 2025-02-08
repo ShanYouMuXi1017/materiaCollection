@@ -12,7 +12,7 @@ export const getFileListByType = (p) => get('/public/selectfilebyfiletype', p)
 export const getRecoveryFile = (p) => get('/recoveryfile/list', p)
 
 // 获取存储占用
-export const getStorage = (p) => get('/filetransfer/getstorage', p)
+export const getStorage = (p) => get('/publictransfer/getstorage', p)
 // 获取文件目录树
 export const getFoldTree = (p) => get('/public/getfiletree', p)
 
@@ -61,7 +61,7 @@ export const batchDeleteRecoveryFile = (p) =>
  * 文件公共接口
  */
 // 文件预览
-export const getFilePreview = (p) => get('/filetransfer/preview', p)
+export const getFilePreview = (p) => get('/publictransfer/preview', p)
 // 文件修改
 export const modifyFileContent = (p) => post('/public/update', p)
 

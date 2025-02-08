@@ -16,15 +16,21 @@ import com.qiwenshare.common.util.DateUtil;
 import com.qiwenshare.common.util.security.JwtUser;
 import com.qiwenshare.common.util.security.SessionUtil;
 import com.qiwenshare.file.api.IFileService;
+import com.qiwenshare.file.api.IPublicFileService;
+import com.qiwenshare.file.api.IPublicService;
 import com.qiwenshare.file.api.IUserFileService;
 import com.qiwenshare.file.component.AsyncTaskComp;
 import com.qiwenshare.file.component.FileDealComp;
+import com.qiwenshare.file.component.PublicDealComp;
 import com.qiwenshare.file.config.es.FileSearch;
 import com.qiwenshare.file.domain.FileBean;
-import com.qiwenshare.file.domain.UserFile;
+import com.qiwenshare.file.domain.PublicBean;
+import com.qiwenshare.file.domain.PublicFile;
+
 import com.qiwenshare.file.dto.file.*;
 import com.qiwenshare.file.io.QiwenFile;
 import com.qiwenshare.file.util.QiwenFileUtil;
+import com.qiwenshare.file.util.QiwenPublicUtil;
 import com.qiwenshare.file.util.TreeNode;
 import com.qiwenshare.file.vo.file.FileDetailVO;
 import com.qiwenshare.file.vo.file.FileListVO;
@@ -39,6 +45,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.eclipse.jetty.util.StringUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.parameters.P;
 import org.springframework.util.ClassUtils;
 import org.springframework.web.bind.annotation.*;
 
@@ -68,13 +75,13 @@ public class PublicController {
 
 
     @Resource
-    IFileService fileService;
+    IPublicService publicService;
     @Resource
-    IUserFileService userFileService;
+    IPublicFileService publicFileService;
     @Resource
     UFOPFactory ufopFactory;
-    @Resource
-    FileDealComp fileDealComp;
+    @Autowired
+    PublicDealComp fileDealComp;
     @Resource
     AsyncTaskComp asyncTaskComp;
     @Autowired
@@ -96,8 +103,8 @@ public class PublicController {
             String filePath = createFileDTO.getFilePath();
             String fileName = createFileDTO.getFileName();
             String extendName = createFileDTO.getExtendName();
-            List<UserFile> userFiles = userFileService.selectSameUserFile(fileName, filePath, extendName, userId);
-            if (userFiles != null && !userFiles.isEmpty()) {
+            List<PublicFile> publicFiles = publicFileService.selectSameUserFile(fileName, filePath, extendName, userId);
+            if (publicFiles != null && !publicFiles.isEmpty()) {
                 return RestResult.fail().message("同名文件已存在");
             }
             String uuid = UUID.randomUUID().toString().replaceAll("-", "");
@@ -122,7 +129,7 @@ public class PublicController {
             copyFile.setExtendName(extendName);
             String fileUrl = copier.copy(fileInputStream, copyFile);
 
-            FileBean fileBean = new FileBean();
+            PublicBean fileBean = new PublicBean();
             fileBean.setFileId(IdUtil.getSnowflakeNextIdStr());
             fileBean.setFileSize(0L);
             fileBean.setFileUrl(fileUrl);
@@ -131,21 +138,21 @@ public class PublicController {
             fileBean.setCreateTime(DateUtil.getCurrentTime());
             fileBean.setCreateUserId(SessionUtil.getSession().getUserId());
             fileBean.setFileStatus(1);
-            boolean saveFlag = fileService.save(fileBean);
-            UserFile userFile = new UserFile();
+            boolean saveFlag = publicService.save(fileBean);
+            PublicFile publicFile = new PublicFile();
             if (saveFlag) {
-                userFile.setUserFileId(IdUtil.getSnowflakeNextIdStr());
-                userFile.setUserId(userId);
-                userFile.setFileName(fileName);
-                userFile.setFilePath(filePath);
-                userFile.setDeleteFlag(0);
-                userFile.setIsDir(0);
-                userFile.setExtendName(extendName);
-                userFile.setUploadTime(DateUtil.getCurrentTime());
-                userFile.setFileId(fileBean.getFileId());
-                userFile.setCreateTime(DateUtil.getCurrentTime());
-                userFile.setCreateUserId(SessionUtil.getUserId());
-                userFileService.save(userFile);
+                publicFile.setUserFileId(IdUtil.getSnowflakeNextIdStr());
+                publicFile.setUserId(userId);
+                publicFile.setFileName(fileName);
+                publicFile.setFilePath(filePath);
+                publicFile.setDeleteFlag(0);
+                publicFile.setIsDir(0);
+                publicFile.setExtendName(extendName);
+                publicFile.setUploadTime(DateUtil.getCurrentTime());
+                publicFile.setFileId(fileBean.getFileId());
+                publicFile.setCreateTime(DateUtil.getCurrentTime());
+                publicFile.setCreateUserId(SessionUtil.getUserId());
+                publicFileService.save(publicFile);
             }
             return RestResult.success().message("文件创建成功");
         } catch (Exception e) {
@@ -170,10 +177,10 @@ public class PublicController {
             return RestResult.fail().message("同名文件夹已存在");
         }
 
-        UserFile userFile = QiwenFileUtil.getQiwenDir(userId, filePath, createFoldDto.getFileName());
+        PublicFile publicFile = QiwenPublicUtil.getQiwenDir(userId, filePath, createFoldDto.getFileName());
 
-        userFileService.save(userFile);
-        fileDealComp.uploadESByUserFileId(userFile.getUserFileId());
+        publicFileService.save(publicFile);
+        fileDealComp.uploadESByUserFileId(publicFile.getUserFileId());
         return RestResult.success();
     }
 
@@ -248,26 +255,26 @@ public class PublicController {
     public RestResult<String> renameFile(@RequestBody RenameFileDTO renameFileDto) {
 
         JwtUser sessionUserBean =  SessionUtil.getSession();
-        UserFile userFile = userFileService.getById(renameFileDto.getUserFileId());
+        PublicFile publicFile = publicFileService.getById(renameFileDto.getUserFileId());
 
-        List<UserFile> userFiles = userFileService.selectUserFileByNameAndPath(renameFileDto.getFileName(), userFile.getFilePath(), sessionUserBean.getUserId());
-        if (userFiles != null && !userFiles.isEmpty()) {
+        List<PublicFile> publicFiles = publicFileService.selectUserFileByNameAndPath(renameFileDto.getFileName(), publicFile.getFilePath(), sessionUserBean.getUserId());
+        if (publicFiles != null && !publicFiles.isEmpty()) {
             return RestResult.fail().message("同名文件已存在");
         }
 
-        LambdaUpdateWrapper<UserFile> lambdaUpdateWrapper = new LambdaUpdateWrapper<>();
-        lambdaUpdateWrapper.set(UserFile::getFileName, renameFileDto.getFileName())
-                .set(UserFile::getUploadTime, DateUtil.getCurrentTime())
-                .eq(UserFile::getUserFileId, renameFileDto.getUserFileId());
-        userFileService.update(lambdaUpdateWrapper);
-        if (1 == userFile.getIsDir()) {
-            List<UserFile> list = userFileService.selectUserFileByLikeRightFilePath(new QiwenFile(userFile.getFilePath(), userFile.getFileName(), true).getPath(), sessionUserBean.getUserId());
+        LambdaUpdateWrapper<PublicFile> lambdaUpdateWrapper = new LambdaUpdateWrapper<>();
+        lambdaUpdateWrapper.set(PublicFile::getFileName, renameFileDto.getFileName())
+                .set(PublicFile::getUploadTime, DateUtil.getCurrentTime())
+                .eq(PublicFile::getUserFileId, renameFileDto.getUserFileId());
+        publicFileService.update(lambdaUpdateWrapper);
+        if (1 == publicFile.getIsDir()) {
+            List<PublicFile> list = publicFileService.selectUserFileByLikeRightFilePath(new QiwenFile(publicFile.getFilePath(), publicFile.getFileName(), true).getPath(), sessionUserBean.getUserId());
 
-            for (UserFile newUserFile : list) {
-                String escapedPattern = Pattern.quote(new QiwenFile(userFile.getFilePath(), userFile.getFileName(), userFile.getIsDir() == 1).getPath());
-                newUserFile.setFilePath(newUserFile.getFilePath().replaceFirst(escapedPattern,
-                        new QiwenFile(userFile.getFilePath(), renameFileDto.getFileName(), userFile.getIsDir() == 1).getPath()));
-                userFileService.updateById(newUserFile);
+            for (PublicFile newPublicFile : list) {
+                String escapedPattern = Pattern.quote(new QiwenFile(publicFile.getFilePath(), publicFile.getFileName(), publicFile.getIsDir() == 1).getPath());
+                newPublicFile.setFilePath(newPublicFile.getFilePath().replaceFirst(escapedPattern,
+                        new QiwenFile(publicFile.getFilePath(), renameFileDto.getFileName(), publicFile.getIsDir() == 1).getPath()));
+                publicFileService.updateById(newPublicFile);
             }
         }
         fileDealComp.uploadESByUserFileId(renameFileDto.getUserFileId());
@@ -286,11 +293,11 @@ public class PublicController {
         System.out.println("文件路径:"+filePath);
         if ("0".equals(fileType)) {
             // 0 是文件夹
-            IPage<FileListVO> fileList = userFileService.userFileList(null, filePath, currentPage, pageCount);
+            IPage<FileListVO> fileList = publicFileService.userFileList(null, filePath, currentPage, pageCount);
             return RestResult.success().dataList(fileList.getRecords(), fileList.getTotal());
         } else {
             // 1 是文件
-            IPage<FileListVO> fileList = userFileService.getFileByFileType(Integer.valueOf(fileType), currentPage, pageCount, SessionUtil.getSession().getUserId());
+            IPage<FileListVO> fileList = publicFileService.getFileByFileType(Integer.valueOf(fileType), currentPage, pageCount, SessionUtil.getSession().getUserId());
             return RestResult.success().dataList(fileList.getRecords(), fileList.getTotal());
         }
     }
@@ -303,10 +310,10 @@ public class PublicController {
     public RestResult<String> deleteImageByIds(@RequestBody BatchDeleteFileDTO batchDeleteFileDto) {
         String userFileIds = batchDeleteFileDto.getUserFileIds();
         String[] userFileIdList = userFileIds.split(",");
-        userFileService.update(new UpdateWrapper<UserFile>().lambda().set(UserFile::getDeleteFlag, 1).in(UserFile::getUserFileId, Arrays.asList(userFileIdList)));
+        publicFileService.update(new UpdateWrapper<PublicFile>().lambda().set(PublicFile::getDeleteFlag, 1).in(PublicFile::getUserFileId, Arrays.asList(userFileIdList)));
         for (String userFileId : userFileIdList) {
             executor.execute(()->{
-                    userFileService.deleteUserFile(userFileId, SessionUtil.getUserId());
+                publicFileService.deleteUserFile(userFileId, SessionUtil.getUserId());
             });
 
             fileDealComp.deleteESByUserFileId(userFileId);
@@ -322,7 +329,7 @@ public class PublicController {
     public RestResult deleteFile(@RequestBody DeleteFileDTO deleteFileDto) {
 
         JwtUser sessionUserBean =  SessionUtil.getSession();
-        userFileService.deleteUserFile(deleteFileDto.getUserFileId(), sessionUserBean.getUserId());
+        publicFileService.deleteUserFile(deleteFileDto.getUserFileId(), sessionUserBean.getUserId());
         fileDealComp.deleteESByUserFileId(deleteFileDto.getUserFileId());
 
         return RestResult.success();
@@ -336,7 +343,7 @@ public class PublicController {
     public RestResult<String> unzipFile(@RequestBody UnzipFileDTO unzipFileDto) {
 
         try {
-            fileService.unzipFile(unzipFileDto.getUserFileId(), unzipFileDto.getUnzipMode(), unzipFileDto.getFilePath());
+            publicService.unzipFile(unzipFileDto.getUserFileId(), unzipFileDto.getUnzipMode(), unzipFileDto.getFilePath());
         } catch (QiwenException e) {
             return RestResult.fail().message(e.getMessage());
         }
@@ -355,17 +362,17 @@ public class PublicController {
         String userFileIds = copyFileDTO.getUserFileIds();
         String[] userFileIdArr = userFileIds.split(",");
         for (String userFileId : userFileIdArr) {
-            UserFile userFile = userFileService.getById(userFileId);
-            String oldfilePath = userFile.getFilePath();
-            String fileName = userFile.getFileName();
-            if (userFile.isDirectory()) {
+            PublicFile publicFile = publicFileService.getById(userFileId);
+            String oldfilePath = publicFile.getFilePath();
+            String fileName = publicFile.getFileName();
+            if (publicFile.isDirectory()) {
                 QiwenFile qiwenFile = new QiwenFile(oldfilePath, fileName, true);
                 if (filePath.startsWith(qiwenFile.getPath() + QiwenFile.separator) || filePath.equals(qiwenFile.getPath())) {
                     return RestResult.fail().message("原路径与目标路径冲突，不能复制");
                 }
             }
 
-            userFileService.userFileCopy(SessionUtil.getUserId(), userFileId, filePath);
+            publicFileService.userFileCopy(SessionUtil.getUserId(), userFileId, filePath);
             fileDealComp.deleteRepeatSubDirFile(filePath, userId);
         }
 
@@ -380,11 +387,11 @@ public class PublicController {
     public RestResult<String> moveFile(@RequestBody MoveFileDTO moveFileDto) {
 
         JwtUser sessionUserBean =  SessionUtil.getSession();
-        UserFile userFile = userFileService.getById(moveFileDto.getUserFileId());
-        String oldfilePath = userFile.getFilePath();
+        PublicFile publicFile = publicFileService.getById(moveFileDto.getUserFileId());
+        String oldfilePath = publicFile.getFilePath();
         String newfilePath = moveFileDto.getFilePath();
-        String fileName = userFile.getFileName();
-        String extendName = userFile.getExtendName();
+        String fileName = publicFile.getFileName();
+        String extendName = publicFile.getExtendName();
         if (StringUtil.isEmpty(extendName)) {
             QiwenFile qiwenFile = new QiwenFile(oldfilePath, fileName, true);
             if (newfilePath.startsWith(qiwenFile.getPath() + QiwenFile.separator) || newfilePath.equals(qiwenFile.getPath())) {
@@ -392,7 +399,7 @@ public class PublicController {
             }
         }
 
-        userFileService.updateFilepathByUserFileId(moveFileDto.getUserFileId(), newfilePath, sessionUserBean.getUserId());
+        publicFileService.updateFilepathByUserFileId(moveFileDto.getUserFileId(), newfilePath, sessionUserBean.getUserId());
 
         fileDealComp.deleteRepeatSubDirFile(newfilePath, sessionUserBean.getUserId());
         return RestResult.success();
@@ -414,14 +421,14 @@ public class PublicController {
         String[] userFileIdArr = userFileIds.split(",");
 
         for (String userFileId : userFileIdArr) {
-            UserFile userFile = userFileService.getById(userFileId);
-            if (StringUtil.isEmpty(userFile.getExtendName())) {
-                QiwenFile qiwenFile = new QiwenFile(userFile.getFilePath(), userFile.getFileName(), true);
+            PublicFile publicFile = publicFileService.getById(userFileId);
+            if (StringUtil.isEmpty(publicFile.getExtendName())) {
+                QiwenFile qiwenFile = new QiwenFile(publicFile.getFilePath(), publicFile.getFileName(), true);
                 if (newfilePath.startsWith(qiwenFile.getPath() + QiwenFile.separator) || newfilePath.equals(qiwenFile.getPath())) {
                     return RestResult.fail().message("原路径与目标路径冲突，不能移动");
                 }
             }
-            userFileService.updateFilepathByUserFileId(userFile.getUserFileId(), newfilePath, sessionUserBean.getUserId());
+            publicFileService.updateFilepathByUserFileId(publicFile.getUserFileId(), newfilePath, sessionUserBean.getUserId());
         }
 
         return RestResult.success().data("批量移动文件成功");
@@ -436,14 +443,14 @@ public class PublicController {
 
         JwtUser sessionUserBean =  SessionUtil.getSession();
 
-        List<UserFile> userFileList = userFileService.selectFilePathTreeByUserId(sessionUserBean.getUserId());
+        List<PublicFile> publicFileList = publicFileService.selectFilePathTreeByUserId(sessionUserBean.getUserId());
         TreeNode resultTreeNode = new TreeNode();
         resultTreeNode.setLabel(QiwenFile.separator);
         resultTreeNode.setId(0L);
         long id = 1;
-        for (int i = 0; i < userFileList.size(); i++){
-            UserFile userFile = userFileList.get(i);
-            QiwenFile qiwenFile = new QiwenFile(userFile.getFilePath(), userFile.getFileName(), false);
+        for (int i = 0; i < publicFileList.size(); i++){
+            PublicFile publicFile = publicFileList.get(i);
+            QiwenFile qiwenFile = new QiwenFile(publicFile.getFilePath(), publicFile.getFileName(), false);
             String filePath = qiwenFile.getPath();
 
             Queue<String> queue = new LinkedList<>();
@@ -479,22 +486,22 @@ public class PublicController {
     @ResponseBody
     public RestResult<String> updateFile(@RequestBody UpdateFileDTO updateFileDTO) {
         JwtUser sessionUserBean =  SessionUtil.getSession();
-        UserFile userFile = userFileService.getById(updateFileDTO.getUserFileId());
-        FileBean fileBean = fileService.getById(userFile.getFileId());
-        Long pointCount = fileService.getFilePointCount(userFile.getFileId());
-        String fileUrl = fileBean.getFileUrl();
+        PublicFile publicFile = publicFileService.getById(updateFileDTO.getUserFileId());
+        PublicBean publicBean = publicService.getById(publicFile.getFileId());
+        Long pointCount = publicService.getFilePointCount(publicFile.getFileId());
+        String fileUrl = publicBean.getFileUrl();
         if (pointCount > 1) {
-            fileUrl = fileDealComp.copyFile(fileBean, userFile);
+            fileUrl = fileDealComp.copyFile(publicBean, publicFile);
         }
         String content = updateFileDTO.getFileContent();
         ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(content.getBytes());
         try {
             int fileSize = byteArrayInputStream.available();
-            fileDealComp.saveFileInputStream(fileBean.getStorageType(), fileUrl, byteArrayInputStream);
+            fileDealComp.saveFileInputStream(publicBean.getStorageType(), fileUrl, byteArrayInputStream);
 
-            String md5Str = fileDealComp.getIdentifierByFile(fileUrl, fileBean.getStorageType());
+            String md5Str = fileDealComp.getIdentifierByFile(fileUrl, publicBean.getStorageType());
 
-            fileService.updateFileDetail(userFile.getUserFileId(), md5Str, fileSize);
+            publicService.updateFileDetail(publicFile.getUserFileId(), md5Str, fileSize);
 
 
         } catch (Exception e) {
@@ -514,7 +521,7 @@ public class PublicController {
     @ResponseBody
     public RestResult<FileDetailVO> queryFileDetail(
             @Parameter(description = "用户文件Id", required = true) String userFileId){
-        FileDetailVO vo = fileService.getFileDetail(userFileId);
+        FileDetailVO vo = publicService.getFileDetail(userFileId);
         return RestResult.success().data(vo);
     }
 

@@ -14,8 +14,8 @@
 </template>
 
 <script>
-import AsideMenuPub from '_c/file/AsideMenuPub.vue'
-import FileListPub from '_c/file/FileListPub.vue'
+import AsideMenuPub from '_c/public/AsideMenuPub.vue'
+import FileListPub from '_c/public/FileListPub.vue'
 
 export default {
   name: 'Public',
