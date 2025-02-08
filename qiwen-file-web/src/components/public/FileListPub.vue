@@ -160,7 +160,7 @@ export default {
       event.preventDefault()
       // 只有在全部页面才可以进行以下操作
       if (![6, 8].includes(this.fileType)) {
-        this.$openBox
+        this.$openBox2
             .contextMenu({
               selectedFile: undefined,
               domEvent: event,

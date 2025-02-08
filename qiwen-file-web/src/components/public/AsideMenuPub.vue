@@ -223,6 +223,8 @@
 </template>
 
 <script>
+import {getStorage} from "@/request/public";
+
 export default {
   name: 'SideMenuPub',
   data() {
@@ -245,7 +247,9 @@ export default {
         { color: '#67C23A', percentage: 50 },
         { color: '#E6A23C', percentage: 80 },
         { color: '#F56C6C', percentage: 100 }
-      ]
+      ],
+      storageValue:0, //文件已占用的存储空间大小
+      totalStorageValue:0
     }
   },
   computed: {
@@ -253,13 +257,13 @@ export default {
     activeIndex() {
       return String(this.$route.query.fileType) //  获取当前路由参数中包含的文件类型
     },
-    // 存储容量
-    storageValue() {
-      return this.$store.state.sideMenu.storageValue
-    },
-    totalStorageValue() {
-      return this.$store.state.sideMenu.totalStorageValue
-    },
+    // // 存储容量
+    // storageValue() {
+    //   return this.storageValue
+    // },
+    // totalStorageValue() {
+    //   return this.totalStorageValue
+    // },
     // 存储百分比
     storagePercentage() {
       return this.totalStorageValue
@@ -289,6 +293,11 @@ export default {
     }
   },
   created() {
+    getStorage().then(res=>{
+      console.log(res);
+      this.totalStorageValue = res.data.totalStorageSize
+      this.storageValue = res.data.usedStorageSize;
+    })
     this.isCollapse = localStorage.getItem('qiwen_is_collapse') === 'true' //  读取保存的状态
   },
   mounted() {

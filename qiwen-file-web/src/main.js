@@ -13,6 +13,7 @@ import 'element-ui/lib/theme-chalk/index.css'
 import globalFunction from '@/libs/globalFunction/index.js'
 // 引入文件操作相关插件
 import fileOperationPlugins from '@/plugins/fileOperationPlugins.js'
+import publicOperationPlugins from '@/plugins/publicOperationPlugins.js'
 // 引入 Element UI 组件
 import element from '@/plugins/element.js'
 // 引入自定义的全局配置
@@ -34,6 +35,10 @@ for (let key in globalFunction) {
 }
 for (let key in fileOperationPlugins) {
 	Vue.prototype[`$${key}`] = fileOperationPlugins[key]
+}
+
+for (let key in publicOperationPlugins) {
+	Vue.prototype[`$${key}`] = publicOperationPlugins[key]
 }
 
 Vue.use(element)
