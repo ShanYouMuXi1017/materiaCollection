@@ -21,6 +21,7 @@
 					>文档</a
 				></el-menu-item
 			>
+      <el-menu-item index="Public">公共区域</el-menu-item>
 		</el-menu>
 		<el-menu
 			:default-active="activeIndex"
@@ -115,7 +116,10 @@ export default {
 				}
 			} else if (key === 'File') {
 				this.$router.push({ name: key, query: { fileType: 0, filePath: '/' } })
-			} else {
+			} else if (key === 'Public') {
+        this.$router.push({ name: key, query: { fileType: 0, filePath: '/' } })
+      }
+      else {
 				this.$router.push({ name: key })
 			}
 		}

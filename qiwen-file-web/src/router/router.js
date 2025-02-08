@@ -46,6 +46,18 @@ export default new Router({
 			}
 		},
 		{
+			path: '/public',
+			name: 'Public',
+			component: () => import(/* webpackChunkName: "file" */ '_v/Public.vue'),
+			meta: {
+				requireAuth: true, //  当前路由是否需要登录才可进入
+				title: '公共区域',
+				content: {
+					description: '图片 文档 视频 音乐 其他 回收站 我的分享'
+				}
+			}
+		},
+		{
 			path: '/onlyoffice',
 			name: 'Onlyoffice',
 			meta: {
