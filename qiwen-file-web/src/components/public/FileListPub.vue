@@ -11,15 +11,15 @@
     </el-header>
     <div class="middle-wrapper">
       <!-- 面包屑导航栏 -->
-      <BreadCrumb
+      <BreadCrumbPub
           class="breadcrumb"
           :fileType="fileType"
           :filePath="filePath"
           @getTableDataByType="getTableDataByType"
-      ></BreadCrumb>
+      ></BreadCrumbPub>
     </div>
     <!-- 文件列表-表格模式 -->
-    <FileTable
+    <FileTablePub
         :fileType="fileType"
         :filePath="filePath"
         :fileList="fileList"
@@ -27,7 +27,7 @@
         v-if="fileModel === 0"
         @getTableDataByType="getTableDataByType"
         @click.native.right="handleClickRight"
-    ></FileTable>
+    ></FileTablePub>
     <!-- 文件列表-网格模式 -->
     <FileGrid
         :fileType="fileType"
@@ -48,31 +48,29 @@
         @click.native.right="handleClickRight"
     ></FileTimeLine>
     <div class="pagination-wrapper">
-      <div class="current-page-count">当前页{{ fileList.length }}条</div>
+      <div class="current-page-count">共{{ fileList.length }}条</div>
       <!-- 回收站不展示分页组件 -->
-      <el-pagination
-          :current-page="pageData.currentPage"
-          :page-size="pageData.pageCount"
-          :total="pageData.total"
-          :page-sizes="[10, 50, 100, 200]"
-          :layout="
-					screenWidth <= 768
-						? 'total, prev, next, jumper'
-						: 'sizes, total, prev, pager, next'
-				"
-          @current-change="handleCurrentChange"
-          @size-change="handleSizeChange"
-          v-if="fileType !== 6"
-      >
-      </el-pagination>
+      <!--<el-pagination-->
+      <!--    :current-page="pageData.currentPage"-->
+      <!--    :page-size="pageData.pageCount"-->
+      <!--    :total="pageData.total"-->
+      <!--    :page-sizes="[10, 50, 100, 200]"-->
+      <!--    :layout="-->
+			<!--		screenWidth <= 768-->
+			<!--			? 'total, prev, next, jumper'-->
+			<!--			: 'sizes, total, prev, pager, next'-->
+			<!--	"-->
+      <!--    @current-change="handleCurrentChange"-->
+      <!--    @size-change="handleSizeChange"-->
+      <!--    v-if="fileType !== 6"-->
+      <!--&gt;-->
+      <!--</el-pagination>-->
     </div>
   </div>
 </template>
 
 <script>
 import OperationMenu from './components/OperationMenu.vue'
-import BreadCrumb from '_c/common/BreadCrumb.vue'
-import FileTable from '_c/common/FileTable.vue'
 import FileGrid from './components/FileGrid.vue'
 import FileTimeLine from './components/FileTimeLine.vue'
 
@@ -83,13 +81,15 @@ import {
   getMyShareFileList,
   searchFile
 } from '_r/public.js'
+import BreadCrumbPub from "_c/common/BreadCrumbPub.vue";
+import FileTablePub from "_c/common/FileTablePub.vue";
 
 export default {
   name: 'FileListPub',
   components: {
+    FileTablePub,
     OperationMenu,
-    BreadCrumb,
-    FileTable,
+    BreadCrumbPub,
     FileGrid,
     FileTimeLine
   },
@@ -99,11 +99,11 @@ export default {
       loading: true, //  表格数据-loading
       fileList: [], //  表格数据-文件列表
       // 分页数据
-      pageData: {
-        currentPage: 1,
-        pageCount: 50,
-        total: 0
-      }
+      // pageData: {
+      //   currentPage: 1,
+      //   pageCount: 50,
+      //   total: 0
+      // }
     }
   },
   computed: {
@@ -128,23 +128,23 @@ export default {
     filePath() {
       // 当左侧菜单选择“全部”或“我的分享”，文件路径发生变化时，再重新获取文件列表
       if (this.$route.name === 'Public' && [0, 8].includes(this.fileType)) {
-        this.setPageCount()
+        // this.setPageCount()
         this.getTableDataByType()
       }
     },
     fileType() {
       if (this.$route.name === 'Public') {
-        this.setPageCount()
+        // this.setPageCount()
         this.getTableDataByType()
       }
     },
     // 监听文件查看模式
     fileModel() {
-      this.setPageCount()
+      // this.setPageCount()
     }
   },
   created() {
-    this.setPageCount()
+    // this.setPageCount()
     this.getTableDataByType()
     console.log("===========");
     console.log(this.filePath);
@@ -177,15 +177,15 @@ export default {
     /**
      * 表格数据获取相关事件 | 调整分页大小
      */
-    setPageCount() {
-      this.pageData.currentPage = 1
-      if (this.fileModel === 0) {
-        this.pageData.pageCount = 50
-      }
-      if (this.fileModel === 1) {
-        this.pageData.pageCount = 100
-      }
-    },
+    // setPageCount() {
+    //   this.pageData.currentPage = 1
+    //   if (this.fileModel === 0) {
+    //     this.pageData.pageCount = 50
+    //   }
+    //   if (this.fileModel === 1) {
+    //     this.pageData.pageCount = 100
+    //   }
+    // },
     /**
      * 表格数据获取相关事件 | 获取文件列表数据
      */
@@ -220,17 +220,19 @@ export default {
       let data = {
         fileType: this.fileType,
         filePath: this.filePath,
-        currentPage: this.pageData.currentPage,
-        pageCount: this.pageData.pageCount
+        // currentPage: this.pageData.currentPage,
+        // pageCount: this.pageData.pageCount
       }
       console.log("2222222");
       console.log(this.filePath);
       console.log("2222222");
       console.log(this.fileType);
       getFileListByPath(data).then((res) => {
+        console.log("返回个数");
+        console.log(res);
         if (res.success) {
           this.fileList = res.dataList
-          this.pageData.total = Number(res.total)
+          // this.pageData.total = Number(res.total)
           this.loading = false
         } else {
           this.$message.error(res.message)
@@ -240,17 +242,17 @@ export default {
     /**
      * 表格数据获取相关事件 | 分页组件 | 当前页码改变
      */
-    handleCurrentChange(currentPage) {
-      this.pageData.currentPage = currentPage
-      this.getTableDataByType()
-    },
+    // handleCurrentChange(currentPage) {
+    //   this.pageData.currentPage = currentPage
+    //   this.getTableDataByType()
+    // },
     /**
      * 表格数据获取相关事件 | 分页组件 | 页大小改变时
      */
-    handleSizeChange(pageCount) {
-      this.pageData.pageCount = pageCount
-      this.getTableDataByType()
-    },
+    // handleSizeChange(pageCount) {
+    //   this.pageData.pageCount = pageCount
+    //   this.getTableDataByType()
+    // },
     /**
      * 表格数据获取相关事件 | 获取回收站文件列表
      */
@@ -271,8 +273,8 @@ export default {
       let data = {
         shareFilePath: this.filePath,
         shareBatchNum: this.$route.query.shareBatchNum,
-        currentPage: this.pageData.currentPage,
-        pageCount: this.pageData.pageCount
+        // currentPage: this.pageData.currentPage,
+        // pageCount: this.pageData.pageCount
       }
       getMyShareFileList(data).then((res) => {
         if (res.success) {
@@ -291,13 +293,13 @@ export default {
       //  分类型
       let data = {
         fileType: this.fileType,
-        currentPage: this.pageData.currentPage,
-        pageCount: this.pageData.pageCount
+        // currentPage: this.pageData.currentPage,
+        // pageCount: this.pageData.pageCount
       }
       getFileListByType(data).then((res) => {
         if (res.success) {
           this.fileList = res.dataList
-          this.pageData.total = Number(res.total)
+          // this.pageData.total = Number(res.total)
           this.loading = false
         } else {
           this.$message.error(res.message)
@@ -312,19 +314,21 @@ export default {
     getSearchFileList(fileName) {
       this.loading = true
       searchFile({
-        currentPage: this.pageData.currentPage,
-        pageCount: this.pageData.pageCount,
+        // currentPage: this.pageData.currentPage,
+        // pageCount: this.pageData.pageCount,
         fileName: fileName
       }).then((res) => {
         this.loading = false
         if (res.success) {
-          this.fileList = res.dataList.map((item) => {
+          console.log("过来");
+          console.log(res);
+          this.fileList = res.dataList/*.map((item) => {
             return {
               ...item,
               highlightFields: item.highLight.fileName[0]
             }
-          })
-          this.pageData.total = res.data.totalHits
+          })*/
+          // this.pageData.total = res.data.totalHits
         } else {
           this.$message.error(res.message)
         }

@@ -86,16 +86,16 @@
 					@click="handleBatchDownloadBtnClick"
 					>批量下载</el-button
 				>
-				<el-button
-					size="mini"
-					type="primary"
-					v-if="
-						selectedFiles.length && fileType !== 6 && $route.name !== 'Share'
-					"
-					icon="el-icon-share"
-					@click="handleBatchShareBtnClick"
-					>批量分享</el-button
-				>
+				<!--<el-button-->
+				<!--	size="mini"-->
+				<!--	type="primary"-->
+				<!--	v-if="-->
+				<!--		selectedFiles.length && fileType !== 6 && $route.name !== 'Share'-->
+				<!--	"-->
+				<!--	icon="el-icon-share"-->
+				<!--	@click="handleBatchShareBtnClick"-->
+				<!--	>批量分享</el-button-->
+				<!--&gt;-->
 			</el-button-group>
 		</div>
 

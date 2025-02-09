@@ -22,7 +22,7 @@ import com.qiwenshare.file.api.IUserFileService;
 import com.qiwenshare.file.component.AsyncTaskComp;
 import com.qiwenshare.file.component.FileDealComp;
 import com.qiwenshare.file.component.PublicDealComp;
-import com.qiwenshare.file.config.es.FileSearch;
+import com.qiwenshare.file.config.es.PublicSearch;
 import com.qiwenshare.file.domain.FileBean;
 import com.qiwenshare.file.domain.PublicBean;
 import com.qiwenshare.file.domain.PublicFile;
@@ -35,6 +35,7 @@ import com.qiwenshare.file.util.TreeNode;
 import com.qiwenshare.file.vo.file.FileDetailVO;
 import com.qiwenshare.file.vo.file.FileListVO;
 import com.qiwenshare.file.vo.file.SearchFileVO;
+import com.qiwenshare.file.vo.file.SearchPublicVO;
 import com.qiwenshare.ufop.factory.UFOPFactory;
 import com.qiwenshare.ufop.operation.copy.Copier;
 import com.qiwenshare.ufop.operation.copy.domain.CopyFile;
@@ -188,64 +189,75 @@ public class PublicController {
     @GetMapping(value = "/search")
     @MyLog(operation = "文件搜索", module = CURRENT_MODULE)
     @ResponseBody
-    public RestResult<SearchFileVO> searchFile(SearchFileDTO searchFileDTO) {
-        JwtUser sessionUserBean =  SessionUtil.getSession();
+    public RestResult<FileListVO> searchFile(@Parameter(description = "文件名", required = true) String fileName) {
 
-        int currentPage = (int)searchFileDTO.getCurrentPage() - 1;
-        int pageCount = (int)(searchFileDTO.getPageCount() == 0 ? 10 : searchFileDTO.getPageCount());
-
-        SearchResponse<FileSearch> search = null;
-        try {
-            search = elasticsearchClient.search(s -> s
-                            .index("filesearch")
-                            .query(_1 -> _1
-                                    .bool(_2 -> _2
-                                            .must(_3 -> _3
-                                                    .bool(_4 -> _4
-                                                            .should(_5 -> _5
-                                                                    .match(_6 -> _6
-                                                                            .field("fileName")
-                                                                            .query(searchFileDTO.getFileName())))
-                                                            .should(_5 -> _5
-                                                                    .wildcard(_6 -> _6
-                                                                            .field("fileName")
-                                                                            .wildcard("*" + searchFileDTO.getFileName() + "*")))
-                                                            .should(_5 -> _5
-                                                                    .match(_6 -> _6
-                                                                            .field("content")
-                                                                            .query(searchFileDTO.getFileName())))
-                                                            .should(_5 -> _5
-                                                                    .wildcard(_6 -> _6
-                                                                            .field("content")
-                                                                            .wildcard("*" + searchFileDTO.getFileName() + "*")))
-                                                    ))
-                                            .must(_3 -> _3
-                                                    .term(_4 -> _4
-                                                            .field("userId")
-                                                            .value(sessionUserBean.getUserId())))
-                                    ))
-                            .from(currentPage)
-                            .size(pageCount)
-                            .highlight(h -> h
-                                    .fields("fileName", f -> f.type("plain")
-                                            .preTags("<span class='keyword'>").postTags("</span>"))
-                                    .encoder(HighlighterEncoder.Html))
-                            ,
-                    FileSearch.class);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        List<SearchFileVO> searchFileVOList = new ArrayList<>();
-        for (Hit<FileSearch> hit : search.hits().hits()) {
-            SearchFileVO searchFileVO = new SearchFileVO();
-            BeanUtil.copyProperties(hit.source(), searchFileVO);
-            searchFileVO.setHighLight(hit.highlight());
-            searchFileVOList.add(searchFileVO);
-            asyncTaskComp.checkESUserFileId(searchFileVO.getUserFileId());
-        }
+        List<FileListVO> searchFileVOList = publicFileService.searchFile(fileName);
         return RestResult.success().dataList(searchFileVOList, searchFileVOList.size());
     }
+
+
+    //@Operation(summary = "文件搜索", description = "文件搜索", tags = {"file"})
+    //@GetMapping(value = "/search")
+    //@MyLog(operation = "文件搜索", module = CURRENT_MODULE)
+    //@ResponseBody
+    //public RestResult<SearchFileVO> searchFile(SearchFileDTO searchFileDTO) {
+    //    JwtUser sessionUserBean =  SessionUtil.getSession();
+    //
+    //    int currentPage = (int)searchFileDTO.getCurrentPage() - 1;
+    //    int pageCount = (int)(searchFileDTO.getPageCount() == 0 ? 10 : searchFileDTO.getPageCount());
+    //
+    //    SearchResponse<PublicSearch> search = null;
+    //    try {
+    //        search = elasticsearchClient.search(s -> s
+    //                        .index("publicsearch")
+    //                        .query(_1 -> _1
+    //                                .bool(_2 -> _2
+    //                                        .must(_3 -> _3
+    //                                                .bool(_4 -> _4
+    //                                                        .should(_5 -> _5
+    //                                                                .match(_6 -> _6
+    //                                                                        .field("fileName")
+    //                                                                        .query(searchFileDTO.getFileName())))
+    //                                                        .should(_5 -> _5
+    //                                                                .wildcard(_6 -> _6
+    //                                                                        .field("fileName")
+    //                                                                        .wildcard("*" + searchFileDTO.getFileName() + "*")))
+    //                                                        .should(_5 -> _5
+    //                                                                .match(_6 -> _6
+    //                                                                        .field("content")
+    //                                                                        .query(searchFileDTO.getFileName())))
+    //                                                        .should(_5 -> _5
+    //                                                                .wildcard(_6 -> _6
+    //                                                                        .field("content")
+    //                                                                        .wildcard("*" + searchFileDTO.getFileName() + "*")))
+    //                                                ))
+    //                                        .must(_3 -> _3
+    //                                                .term(_4 -> _4
+    //                                                        .field("userId")
+    //                                                        .value(sessionUserBean.getUserId())))
+    //                                ))
+    //                        .from(currentPage)
+    //                        .size(pageCount)
+    //                        .highlight(h -> h
+    //                                .fields("fileName", f -> f.type("plain")
+    //                                        .preTags("<span class='keyword'>").postTags("</span>"))
+    //                                .encoder(HighlighterEncoder.Html))
+    //                        ,
+    //                PublicSearch.class);
+    //    } catch (IOException e) {
+    //        e.printStackTrace();
+    //    }
+    //
+    //    List<SearchFileVO> searchFileVOList = new ArrayList<>();
+    //    for (Hit<PublicSearch> hit : search.hits().hits()) {
+    //        SearchFileVO searchFileVO = new SearchFileVO();
+    //        BeanUtil.copyProperties(hit.source(), searchFileVO);
+    //        searchFileVO.setHighLight(hit.highlight());
+    //        searchFileVOList.add(searchFileVO);
+    //        asyncTaskComp.checkESUserFileId(searchFileVO.getUserFileId());
+    //    }
+    //    return RestResult.success().dataList(searchFileVOList, searchFileVOList.size());
+    //}
 
 
     @Operation(summary = "文件重命名", description = "文件重命名", tags = {"file"})
@@ -286,19 +298,20 @@ public class PublicController {
     @ResponseBody
     public RestResult<FileListVO> getFileList(
             @Parameter(description = "文件类型", required = true) String fileType,
-            @Parameter(description = "文件路径", required = true) String filePath,
-            @Parameter(description = "当前页", required = true) long currentPage,
-            @Parameter(description = "页面数量", required = true) long pageCount){
+            @Parameter(description = "文件路径", required = true) String filePath
+            //@Parameter(description = "当前页", required = true) long currentPage,
+            //@Parameter(description = "页面数量", required = true) long pageCount
+    ){
         System.out.println("文件类型:"+fileType);
         System.out.println("文件路径:"+filePath);
         if ("0".equals(fileType)) {
             // 0 是文件夹
-            IPage<FileListVO> fileList = publicFileService.userFileList(null, filePath, currentPage, pageCount);
-            return RestResult.success().dataList(fileList.getRecords(), fileList.getTotal());
+            List<FileListVO> fileList = publicFileService.userFileList(null, filePath/*, currentPage, pageCount*/);
+            return RestResult.success().dataList(fileList, fileList.size());
         } else {
             // 1 是文件
-            IPage<FileListVO> fileList = publicFileService.getFileByFileType(Integer.valueOf(fileType), currentPage, pageCount, SessionUtil.getSession().getUserId());
-            return RestResult.success().dataList(fileList.getRecords(), fileList.getTotal());
+            List<FileListVO> fileList = publicFileService.getFileByFileType(Integer.valueOf(fileType)/*, currentPage, pageCount*/, SessionUtil.getSession().getUserId());
+            return RestResult.success().dataList(fileList, fileList.size());
         }
     }
 
@@ -526,6 +539,11 @@ public class PublicController {
     }
 
 
-
+    @Operation(summary = "查询公共区域地址", description = "查询公共区域地址", tags = {"file"})
+    @RequestMapping(value = "/getpublicurl", method = RequestMethod.GET)
+    @ResponseBody
+    public RestResult<String> queryPublicUrl(){
+        return RestResult.success().data(localStoragePath+"/"+bucketNamePub);
+    }
 
 }

@@ -12,7 +12,7 @@ import com.qiwenshare.file.api.IPublicService;
 import com.qiwenshare.file.api.IShareFileService;
 import com.qiwenshare.file.api.IShareService;
 import com.qiwenshare.file.api.IUserService;
-import com.qiwenshare.file.config.es.FileSearch;
+import com.qiwenshare.file.config.es.PublicSearch;
 import com.qiwenshare.file.domain.*;
 import com.qiwenshare.file.io.QiwenFile;
 import com.qiwenshare.file.mapper.*;
@@ -288,19 +288,19 @@ public class PublicDealComp {
                 param.put("userFileId", userFileId);
                 List<PublicFile> userfileResult = publicFileMapper.selectByMap(param);
                 if (userfileResult != null && userfileResult.size() > 0) {
-                    FileSearch fileSearch = new FileSearch();
-                    BeanUtil.copyProperties(userfileResult.get(0), fileSearch);
-                /*if (fileSearch.getIsDir() == 0) {
+                    PublicSearch PublicSearch = new PublicSearch();
+                    BeanUtil.copyProperties(userfileResult.get(0), PublicSearch);
+                /*if (PublicSearch.getIsDir() == 0) {
 
-                    Reader reader = ufopFactory.getReader(fileSearch.getStorageType());
+                    Reader reader = ufopFactory.getReader(PublicSearch.getStorageType());
                     ReadFile readFile = new ReadFile();
-                    readFile.setFileUrl(fileSearch.getFileUrl());
+                    readFile.setFileUrl(PublicSearch.getFileUrl());
                     String content = reader.read(readFile);
                     //全文搜索
-                    fileSearch.setContent(content);
+                    PublicSearch.setContent(content);
 
                 }*/
-                    elasticsearchClient.index(i -> i.index("filesearch").id(fileSearch.getUserFileId()).document(fileSearch));
+                    elasticsearchClient.index(i -> i.index("publicsearch").id(PublicSearch.getUserFileId()).document(PublicSearch));
                 }
             } catch (Exception e) {
                 log.debug("ES更新操作失败，请检查配置");
@@ -314,7 +314,7 @@ public class PublicDealComp {
         exec.execute(() -> {
             try {
                 elasticsearchClient.delete(d -> d
-                        .index("filesearch")
+                        .index("publicsearch")
                         .id(userFileId));
             } catch (Exception e) {
                 log.debug("ES删除操作失败，请检查配置");
@@ -432,6 +432,7 @@ public class PublicDealComp {
         writer1.write(inputStream, writeFile);
     }
 
+    // 这个人上传的文件夹名存在吗？
     public boolean isDirExist(String fileName, String filePath, String userId) {
         LambdaQueryWrapper<PublicFile> lambdaQueryWrapper = new LambdaQueryWrapper<>();
         lambdaQueryWrapper.eq(PublicFile::getFileName, fileName)

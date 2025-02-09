@@ -19,7 +19,7 @@ export const getFoldTree = (p) => get('/public/getfiletree', p)
 /**
  * 单文件操作相关接口
  */
-// 创建文件
+// 创建文件夹
 export const createFold = (p) => post('/public/createFold', p)
 // 获取文件详细信息
 export const getFileDetail = (p) => get('/public/detail', p)
@@ -36,6 +36,11 @@ export const unzipFile = (p) => post('/public/unzipfile', p)
 // 全局搜索文件
 export const searchFile = (p) => get('/public/search', p)
 
+// 保存分享文件
+export const saveShareFile = (p) => post('/share/savesharefile', p)
+
+// 分享文件
+export const shareFile = (p) => post('/share/sharefile', p)
 
 /**
  * 文件批量操作相关接口
@@ -68,3 +73,6 @@ export const modifyFileContent = (p) => post('/public/update', p)
 
 // 获取我已分享的文件列表
 export const getMyShareFileList = (p) => get('/share/shareList', p)
+
+//获取公共区域地址
+export const getPublicUrl =(p) =>get('/public/getpublicurl', p)

@@ -81,7 +81,7 @@ export default {
 			}
 		}
 	},
-	methods: {
+  methods: {
 		/**
 		 * DOM 绑定回车事件
 		 * @description 回车触发新增文件夹事件
@@ -110,7 +110,7 @@ export default {
 			this.sureBtnLoading = true
 			this.$refs[formName].validate((valid) => {
 				if (valid) {
-					createFold({
+          createFold({
 						fileName: this.form.fileName,
 						filePath: this.filePath
 					})

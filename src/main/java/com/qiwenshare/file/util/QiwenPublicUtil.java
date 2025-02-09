@@ -16,7 +16,7 @@ public class QiwenPublicUtil {
         publicFile.setUserId(userId);
         publicFile.setFileId(null);
         publicFile.setFileName(fileName);
-        publicFile.setFilePath(QiwenFile.formatPath(filePath));
+        publicFile.setFilePath(QiwenFile.formatPathPub(filePath));
         publicFile.setExtendName(null);
         publicFile.setIsDir(1);
         publicFile.setUploadTime(DateUtil.getCurrentTime());
