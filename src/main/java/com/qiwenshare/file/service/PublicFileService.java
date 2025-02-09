@@ -5,25 +5,22 @@ import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.RandomUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
-import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.qiwenshare.common.constant.FileConstant;
 import com.qiwenshare.common.util.DateUtil;
 import com.qiwenshare.common.util.security.JwtUser;
 import com.qiwenshare.common.util.security.SessionUtil;
 import com.qiwenshare.file.api.IPublicFileService;
-import com.qiwenshare.file.api.IUserFileService;
-import com.qiwenshare.file.component.FileDealComp;
 import com.qiwenshare.file.component.PublicDealComp;
+import com.qiwenshare.file.domain.PublicBean;
 import com.qiwenshare.file.domain.PublicFile;
 import com.qiwenshare.file.domain.RecoveryFile;
-import com.qiwenshare.file.domain.PublicFile;
 import com.qiwenshare.file.io.QiwenFile;
 import com.qiwenshare.file.mapper.PublicFileMapper;
+import com.qiwenshare.file.mapper.PublicMapper;
 import com.qiwenshare.file.mapper.RecoveryFileMapper;
-import com.qiwenshare.file.mapper.UserFileMapper;
 import com.qiwenshare.file.vo.file.FileListVO;
+import com.qiwenshare.file.vo.file.SearchPublicVO;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,6 +29,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.Executor;
@@ -44,6 +42,9 @@ import java.util.stream.Collectors;
 public class PublicFileService extends ServiceImpl<PublicFileMapper, PublicFile> implements IPublicFileService {
     @Autowired
     PublicFileMapper publicFileMapper;
+
+    @Autowired
+    PublicMapper publicMapper;
     @Resource
     RecoveryFileMapper recoveryFileMapper;
     @Autowired
@@ -75,8 +76,8 @@ public class PublicFileService extends ServiceImpl<PublicFileMapper, PublicFile>
 
 
     @Override
-    public IPage<FileListVO> userFileList(String userId, String filePath, Long currentPage, Long pageCount) {
-        Page<FileListVO> page = new Page<>(currentPage, pageCount);
+    public List<FileListVO> userFileList(String userId, String filePath /*,Long currentPage, Long pageCount*/) {
+        //Page<FileListVO> page = new Page<>(/*currentPage, pageCount*/);
         PublicFile userFile = new PublicFile();
         JwtUser sessionUserBean = SessionUtil.getSession();
         if (userId == null) {
@@ -87,7 +88,57 @@ public class PublicFileService extends ServiceImpl<PublicFileMapper, PublicFile>
 
         userFile.setFilePath(URLDecoder.decodeForPath(filePath, StandardCharsets.UTF_8));
 
-        return publicFileMapper.selectPageVo(page, userFile, null);
+        return publicFileMapper.selectPageVo(/*page,*/ userFile, null);
+    }
+
+
+    @Override
+    public List<FileListVO> searchFile(String fileName) {
+        // 创建 LambdaQueryWrapper
+        LambdaQueryWrapper<PublicFile> lambdaQueryWrapper = new LambdaQueryWrapper<>();
+        lambdaQueryWrapper.like(PublicFile::getFileName, fileName);
+        // 模糊查询 PublicFile
+        List<PublicFile> publicFileList = publicFileMapper.selectList(lambdaQueryWrapper);
+
+        // 用于存储最终结果
+        List<FileListVO> fileListVOList = new ArrayList<>();
+
+        // 遍历查询结果
+        for (PublicFile publicFile : publicFileList) {
+            FileListVO fileListVO = new FileListVO();
+            // 公共字段赋值
+            fileListVO.setUserFileId(publicFile.getUserFileId());
+            fileListVO.setFileName(publicFile.getFileName());
+            fileListVO.setFilePath(publicFile.getFilePath());
+            fileListVO.setExtendName(publicFile.getExtendName());
+            fileListVO.setIsDir(publicFile.getIsDir());
+            fileListVO.setUploadTime(publicFile.getUploadTime());
+            fileListVO.setDeleteFlag(publicFile.getDeleteFlag());
+            fileListVO.setDeleteTime(publicFile.getDeleteTime());
+            fileListVO.setDeleteBatchNum(publicFile.getDeleteBatchNum());
+            fileListVO.setUserId(Long.valueOf(publicFile.getUserId())); // 转换为 Long 类型
+
+            // 判断是否是文件夹
+            if (publicFile.getIsDir() == 1) {
+                // 如果是文件夹，直接添加到结果列表
+                fileListVOList.add(fileListVO);
+            } else {
+                // 如果是文件，需要查询 PublicBean 表获取额外信息
+                PublicBean publicBean = publicMapper.selectById(publicFile.getFileId());
+                if (publicBean != null) {
+                    // 设置文件大小、文件 URL、存储类型、唯一标识符等字段
+                    fileListVO.setFileId(publicBean.getFileId());
+                    fileListVO.setFileUrl(publicBean.getFileUrl());
+                    fileListVO.setFileSize(publicBean.getFileSize());
+                    fileListVO.setStorageType(publicBean.getStorageType());
+                    fileListVO.setIdentifier(publicBean.getIdentifier());
+                }
+                // 添加到结果列表
+                fileListVOList.add(fileListVO);
+            }
+        }
+
+        return fileListVOList;
     }
 
     @Override
@@ -175,12 +226,12 @@ public class PublicFileService extends ServiceImpl<PublicFileMapper, PublicFile>
     }
 
     @Override
-    public IPage<FileListVO> getFileByFileType(Integer fileTypeId, Long currentPage, Long pageCount, String userId) {
-        Page<FileListVO> page = new Page<>(currentPage, pageCount);
+    public List<FileListVO> getFileByFileType(Integer fileTypeId, /*Long currentPage, Long pageCount,*/ String userId) {
+        //Page<FileListVO> page = new Page<>(/*currentPage, pageCount*/);
 
         PublicFile userFile = new PublicFile();
         userFile.setUserId(userId);
-        return publicFileMapper.selectPageVo(page, userFile, fileTypeId);
+        return publicFileMapper.selectPageVo(/*page,*/ userFile, fileTypeId);
     }
 
     @Override

@@ -47,9 +47,25 @@ public class QiwenFile {
         if ("/".equals(path)) {
             return path;
         }
+
         if (!path.startsWith(separator)) {
             path = separator + path;
         }
+        if (path.endsWith("/")) {
+            int length = path.length();
+            return path.substring(0, length - 1);
+        }
+
+        return path;
+    }
+
+
+    public static String formatPathPub(String path) {
+        path = UFOPUtils.pathSplitFormat(path);
+        if ("/".equals(path)) {
+            return path;
+        }
+
         if (path.endsWith("/")) {
             int length = path.length();
             return path.substring(0, length - 1);
@@ -105,5 +121,5 @@ public class QiwenFile {
         return !isDirectory;
     }
 
-    
+
 }

@@ -4,6 +4,7 @@ import Vuex from 'vuex'
 import user from './module/user' //  用户模块
 import fileList from './module/fileList' //  文件列表模块
 import sideMenu from './module/sideMenu' //  左侧菜单模块
+import sideMenuPublic from './module/sideMenuPublic' //  左侧菜单模块
 import common from './module/common' //  公共模块
 import uploadFile from './module/uploadFile' //  拖拽上传文件模块
 import { allColumnList } from '@/libs/map.js'
@@ -28,7 +29,7 @@ export default new Vuex.Store({
 				: state.fileList.selectedColumnList.split(','),
 		// 文件查看模式
 		fileModel: (state) =>
-			state.fileList.fileModel === null ? 0 : Number(state.fileList.fileModel),
+			state.fileList.fileModel === null ? 1 : Number(state.fileList.fileModel),
 		// 网格模式 & 时间线模式下 文件图标大小
 		gridSize: (state) => state.fileList.gridSize,
 		// 剩余存储空间
@@ -45,6 +46,7 @@ export default new Vuex.Store({
 		user,
 		fileList,
 		sideMenu,
+		sideMenuPublic,
 		common,
 		uploadFile
 	}

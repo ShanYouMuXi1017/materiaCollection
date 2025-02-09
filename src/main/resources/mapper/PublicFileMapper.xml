@@ -22,9 +22,9 @@
                 </choose>
                 and a.isDir = 0
             </if>
-            <if test="userFile.userId != null">
-                and a.userId = #{userFile.userId}
-            </if>
+<!--            <if test="userFile.userId != null">-->
+<!--                and a.userId = #{userFile.userId}-->
+<!--            </if>-->
             <if test="userFile.filePath != null">
                 and a.filePath = #{userFile.filePath}
             </if>
