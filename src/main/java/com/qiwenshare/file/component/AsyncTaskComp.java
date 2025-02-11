@@ -3,6 +3,7 @@ package com.qiwenshare.file.component;
 import com.alibaba.fastjson2.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.qiwenshare.file.api.IFiletransferService;
+import com.qiwenshare.file.api.IPublictransferService;
 import com.qiwenshare.file.api.IRecoveryFileService;
 import com.qiwenshare.file.api.IUserFileService;
 import com.qiwenshare.file.domain.FileBean;
@@ -48,6 +49,9 @@ public class AsyncTaskComp {
     IRecoveryFileService recoveryFileService;
     @Resource
     IFiletransferService filetransferService;
+
+    @Resource
+    IPublictransferService publictransferService;
     @Resource
     UFOPFactory ufopFactory;
     @Resource
@@ -73,6 +77,48 @@ public class AsyncTaskComp {
         LambdaQueryWrapper<UserFile> lambdaQueryWrapper = new LambdaQueryWrapper<>();
         lambdaQueryWrapper.eq(UserFile::getFileId, fileId);
         return userFileMapper.selectCount(lambdaQueryWrapper);
+    }
+
+    public Future<String> deletePublicFile(String userFileId) {
+        PublicFile userFile = publicFileMapper.selectById(userFileId);
+        if (userFile.getIsDir() == 1) {
+            LambdaQueryWrapper<PublicFile> userFileLambdaQueryWrapper = new LambdaQueryWrapper<>();
+            userFileLambdaQueryWrapper.eq(PublicFile::getDeleteBatchNum, userFile.getDeleteBatchNum());
+            List<PublicFile> list = publicFileMapper.selectList(userFileLambdaQueryWrapper);
+            recoveryFileService.deletePublicFileByDeleteBatchNum(userFile.getDeleteBatchNum());
+            for (PublicFile userFileItem : list) {
+
+                Long filePointCount = getFilePointCount(userFileItem.getFileId());
+
+                if (filePointCount != null && filePointCount == 0 && userFileItem.getIsDir() == 0) {
+                    PublicBean fileBean = publicMapper.selectById(userFileItem.getFileId());
+                    if (fileBean != null) {
+                        try {
+                            publictransferService.deleteFile(fileBean);
+                            publicMapper.deleteById(fileBean.getFileId());
+                        } catch (Exception e) {
+                            log.error("删除本地文件失败：" + JSON.toJSONString(fileBean));
+                        }
+                    }
+                }
+            }
+        } else {
+
+            recoveryFileService.deletePublicFileByDeleteBatchNum(userFile.getDeleteBatchNum());
+            Long filePointCount = getFilePointCount(userFile.getFileId());
+
+            if (filePointCount != null && filePointCount == 0 && userFile.getIsDir() == 0) {
+                PublicBean fileBean = publicMapper.selectById(userFile.getFileId());
+                try {
+                    publictransferService.deleteFile(fileBean);
+                    publicMapper.deleteById(fileBean.getFileId());
+                } catch (Exception e) {
+                    log.error("删除本地文件失败：" + JSON.toJSONString(fileBean));
+                }
+            }
+        }
+
+        return new AsyncResult<>("deletePublicFile");
     }
 
     public Future<String> deleteUserFile(String userFileId) {

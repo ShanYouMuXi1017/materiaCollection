@@ -7,8 +7,8 @@
 		>
 			<!-- 顶部信息栏 & 工具栏 -->
 			<div class="tip-wrapper" v-if="visible">
-				<div class="name" :title="$file.getFileNameComplete(fileInfo)">
-					{{ $file.getFileNameComplete(fileInfo) }}
+				<div class="name" :title="$publicbean.getFileNameComplete(fileInfo)">
+					{{ $publicbean.getFileNameComplete(fileInfo) }}
 					<span class="un-save" v-show="isModify">（未保存）</span>
 				</div>
 				<div class="editor-preveiw">
@@ -18,8 +18,8 @@
 					<a
 						class="item download-link"
 						target="_blank"
-						:href="$file.getDownloadFilePath(fileInfo)"
-						:download="$file.getFileNameComplete(fileInfo)"
+						:href="$publicbean.getDownloadFilePath(fileInfo)"
+						:download="$publicbean.getFileNameComplete(fileInfo)"
 					>
 						<i class="el-icon-download" title="下载"></i>
 					</a>

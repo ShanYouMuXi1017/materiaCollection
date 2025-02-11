@@ -9,7 +9,7 @@ export const getFileListByPath = (p) => get('/public/getfilelist', p)
 // 获取文件列表（区分文件类型）
 export const getFileListByType = (p) => get('/public/selectfilebyfiletype', p)
 // 获取回收站文件列表
-export const getRecoveryFile = (p) => get('/recoveryfile/list', p)
+export const getRecoveryFile = (p) => get('/recoveryfile/listpub', p)
 
 // 获取存储占用
 export const getStorage = (p) => get('/publictransfer/getstorage', p)

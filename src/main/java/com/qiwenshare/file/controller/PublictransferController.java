@@ -27,6 +27,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
@@ -47,6 +48,12 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/publictransfer")
 public class PublictransferController {
+
+    // 公共文件操作的路径
+    @Value("${ufop.local-storage-path}")
+    private String localStoragePath;
+    @Value("${ufop.bucket-name-pub}")
+    private String bucketNamePub;
 
     @Resource
     IPublictransferService publictransferService;
@@ -212,16 +219,16 @@ public class PublictransferController {
         }
 
         PublicFile userFile = publicFileService.getById(previewDTO.getUserFileId());
-        boolean authResult = publicDealComp.checkAuthDownloadAndPreview(previewDTO.getShareBatchNum(),
-                previewDTO.getExtractionCode(),
-                token,
-                previewDTO.getUserFileId(),
-                previewDTO.getPlatform());
-
-        if (!authResult) {
-            log.error("没有权限预览！！！");
-            return;
-        }
+        //boolean authResult = publicDealComp.checkAuthDownloadAndPreview(previewDTO.getShareBatchNum(),
+        //        previewDTO.getExtractionCode(),
+        //        token,
+        //        previewDTO.getUserFileId(),
+        //        previewDTO.getPlatform());
+        //
+        //if (!authResult) {
+        //    log.error("没有权限预览！！！");
+        //    return;
+        //}
 
         String fileName = userFile.getFileName() + "." + userFile.getExtendName();
         try {

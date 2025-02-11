@@ -10,27 +10,27 @@
 				class="file-item"
 				v-for="(item, index) in fileListSorted"
 				:key="index"
-				:title="$file.getFileNameComplete(item)"
+				:title="$publicbean.getFileNameComplete(item)"
 				:style="`width: ${gridSize + 40}px; `"
 				:class="item.userFileId === selectedFile.userFileId ? 'active' : ''"
-				@click="$file.handleFileNameClick(item, index, fileListSorted)"
+				@click="$publicbean.handleFileNameClick(item, index, fileListSorted)"
 				@contextmenu.prevent="handleContextMenu(item, index, $event)"
 			>
 				<video
 					:style="`height:${gridSize}px; width:${gridSize}px`"
-					v-if="$file.isVideoFile(item)"
-					:src="$file.setFileImg(item)"
+					v-if="$publicbean.isVideoFile(item)"
+					:src="$publicbean.setFileImg(item)"
 				></video>
 				<el-image
 					class="file-img"
-					:src="$file.setFileImg(item)"
+					:src="$publicbean.setFileImg(item)"
 					:style="`width: ${gridSize}px; height: ${gridSize}px;`"
 					fit="cover"
 					v-else
 				/>
 				<div
 					class="file-name"
-					v-html="$file.getFileNameComplete(item, true)"
+					v-html="$publicbean.getFileNameComplete(item, true)"
 				></div>
 				<i
 					class="file-operate el-icon-more"

@@ -361,7 +361,7 @@ export default {
 						break
 					}
 					case 'go': {
-						this.$openBox2.uploadFile({
+            this.$openBox2.uploadFile({
 							params: this.uploadFileParams,
 							uploadWay,
 							serviceEl: this,

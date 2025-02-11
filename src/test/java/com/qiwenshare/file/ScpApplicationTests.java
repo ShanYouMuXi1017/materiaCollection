@@ -17,12 +17,14 @@ public class ScpApplicationTests {
 
     @Test
     public static void main(String[] args) {
-        //获取cpu利用率
-        getOsInfo();
-        //获取内存数据
-        getMemoryInfo();
-        //获取硬盘使用量
-        getDiskUsed();
+
+        System.out.println(URLDecoder.decodeForPath("D:/test", StandardCharsets.UTF_8));
+        ////获取cpu利用率
+        //getOsInfo();
+        ////获取内存数据
+        //getMemoryInfo();
+        ////获取硬盘使用量
+        //getDiskUsed();
     }
 
     /**

@@ -247,7 +247,7 @@ public class PublicFileService extends ServiceImpl<PublicFileMapper, PublicFile>
     @Override
     public List<PublicFile> selectFilePathTreeByUserId(String userId) {
         LambdaQueryWrapper<PublicFile> lambdaQueryWrapper = new LambdaQueryWrapper<>();
-        lambdaQueryWrapper.eq(PublicFile::getUserId, userId)
+        lambdaQueryWrapper/*.eq(PublicFile::getUserId, userId)*/
                 .eq(PublicFile::getIsDir, 1)
                 .eq(PublicFile::getDeleteFlag, 0);
         return publicFileMapper.selectList(lambdaQueryWrapper);
@@ -278,11 +278,11 @@ public class PublicFileService extends ServiceImpl<PublicFileMapper, PublicFile>
             publicFileMapper.update(null, userFileLambdaUpdateWrapper);
         }
 
-        RecoveryFile recoveryFile = new RecoveryFile();
-        recoveryFile.setUserFileId(userFileId);
-        recoveryFile.setDeleteTime(DateUtil.getCurrentTime());
-        recoveryFile.setDeleteBatchNum(uuid);
-        recoveryFileMapper.insert(recoveryFile);
+        //RecoveryFile recoveryFile = new RecoveryFile();
+        //recoveryFile.setUserFileId(userFileId);
+        //recoveryFile.setDeleteTime(DateUtil.getCurrentTime());
+        //recoveryFile.setDeleteBatchNum(uuid);
+        //recoveryFileMapper.insert(recoveryFile);
 
 
     }

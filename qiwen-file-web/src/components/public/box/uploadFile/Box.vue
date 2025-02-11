@@ -183,8 +183,8 @@ export default {
 			return this.$refs.uploader.uploader
 		},
 		// 剩余存储空间
-		remainderStorageValue() {
-			return store.getters.remainderStorageValue
+		free() {
+			return store.getters.free
 		}
 	},
 	methods: {
@@ -271,13 +271,13 @@ export default {
 		 * @param {object} files 批量文件信息
 		 */
 		handleFilesAdded(files) {
-			// 批量选择的文件的总体大小
+      // 批量选择的文件的总体大小
 			const filesTotalSize = files
 				.map((item) => item.size)
 				.reduce((pre, next) => {
 					return pre + next
 				}, 0)
-			if (this.remainderStorageValue < filesTotalSize) {
+			if (this.free < filesTotalSize) {
 				// 批量选择的文件超出剩余存储空间
 				this.$message.warning(
 					`剩余存储空间不足，请重新选择${files.length > 1 ? '批量' : ''}文件`

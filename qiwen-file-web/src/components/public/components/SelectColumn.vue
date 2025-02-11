@@ -40,6 +40,14 @@ export default {
 					value: 'extendName',
 					label: '类型'
 				},
+        {
+          value: 'userId',
+          label: '上传人ID'
+        },
+        {
+          value: 'userName',
+          label: '上传人'
+        },
 				{
 					value: 'fileSize',
 					label: '大小'

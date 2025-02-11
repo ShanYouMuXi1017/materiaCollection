@@ -10,7 +10,7 @@
 	>
 		<img
 			class="file-img"
-			:src="$file.setFileImg(fileInfo)"
+			:src="$publicbean.setFileImg(fileInfo)"
 			:title="`${fileInfo.isDir ? '' : '点击预览'}`"
 		/>
 		<el-form
@@ -24,7 +24,7 @@
 		>
 			<el-form-item label="文件名" prop="fileName">
 				<el-input
-					:value="$file.getFileNameComplete(fileInfo)"
+					:value="$publicbean.getFileNameComplete(fileInfo)"
 					readonly
 				></el-input>
 			</el-form-item>
@@ -40,13 +40,13 @@
 				></el-input>
 			</el-form-item>
 			<el-form-item label="类型" prop="fileName">
-				<el-input :value="$file.getFileType(fileInfo)" readonly></el-input>
+				<el-input :value="$publicbean.getFileType(fileInfo)" readonly></el-input>
 			</el-form-item>
 			<el-form-item label="大小" prop="fileSize">
 				<el-input
 					:value="
 						fileInfo.isDir === 0
-							? $file.calculateFileSize(fileInfo.fileSize)
+							? $publicbean.calculateFileSize(fileInfo.fileSize)
 							: ''
 					"
 					readonly
@@ -80,7 +80,7 @@
 				<el-input :value="fileInfo.endTime" readonly></el-input>
 				<i
 					class="status-icon el-icon-warning"
-					v-if="$file.getFileShareStatus(fileInfo.endTime)"
+					v-if="$publicbean.getFileShareStatus(fileInfo.endTime)"
 				></i>
 				<i class="status-icon el-icon-time" v-else></i>
 			</el-form-item>

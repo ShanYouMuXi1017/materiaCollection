@@ -33,15 +33,15 @@
 				<template slot-scope="scope">
 					<video
 						style="width: 30px; max-height: 30px; cursor: pointer"
-						v-if="$file.isVideoFile(scope.row)"
-						:src="$file.setFileImg(scope.row)"
+						v-if="$publicbean.isVideoFile(scope.row)"
+						:src="$publicbean.setFileImg(scope.row)"
 					></video>
 					<img
-						:src="$file.setFileImg(scope.row)"
+						:src="$publicbean.setFileImg(scope.row)"
 						:title="`${scope.row.isDir ? '' : '点击预览'}`"
 						style="width: 30px; max-height: 30px; cursor: pointer"
 						@click="
-							$file.handleFileNameClick(scope.row, scope.$index, sortedFileList)
+							$publicbean.handleFileNameClick(scope.row, scope.$index, sortedFileList)
 						"
 						v-else
 					/>
@@ -60,21 +60,21 @@
 				<template slot-scope="scope">
 					<span
 						@click="
-							$file.handleFileNameClick(scope.row, scope.$index, sortedFileList)
+							$publicbean.handleFileNameClick(scope.row, scope.$index, sortedFileList)
 						"
 					>
 						<span
 							class="file-name"
 							style="cursor: pointer"
 							:title="`${scope.row.isDir ? '' : '点击预览'}`"
-							v-html="$file.getFileNameComplete(scope.row, true)"
+							v-html="$publicbean.getFileNameComplete(scope.row, true)"
 						></span>
 						<div class="file-info" v-if="screenWidth <= 768">
 							{{ scope.row.uploadTime }}
 							<span class="file-size">
 								{{
 									scope.row.isDir === 0
-										? $file.calculateFileSize(scope.row.fileSize)
+										? $publicbean.calculateFileSize(scope.row.fileSize)
 										: ''
 								}}
 							</span>
@@ -117,7 +117,7 @@
 				v-if="selectedColumnList.includes('extendName') && screenWidth > 768"
 			>
 				<template slot-scope="scope">
-					<span>{{ $file.getFileType(scope.row) }}</span>
+					<span>{{ $publicbean.getFileType(scope.row) }}</span>
 				</template>
 			</el-table-column>
 			<el-table-column
@@ -133,20 +133,20 @@
 				<template slot-scope="scope">
 					{{
 						scope.row.isDir === 0
-							? $file.calculateFileSize(scope.row.fileSize)
+							? $publicbean.calculateFileSize(scope.row.fileSize)
 							: ''
 					}}
 				</template>
 			</el-table-column>
       <el-table-column
           label="上传人ID"
-          width="100"
-          prop="extendName"
-          key="extendName"
+          width="160"
+          prop="userId"
+          key="userId"
           :sort-by="['isDir', 'extendName']"
           sortable
           show-overflow-tooltip
-          v-if="selectedColumnList.includes('extendName') && screenWidth > 768"
+          v-if="selectedColumnList.includes('userId') && screenWidth > 768"
       >
         <template slot-scope="scope">
           <span>{{ scope.row.userId }}</span>
@@ -155,15 +155,15 @@
       <el-table-column
           label="上传人"
           width="120"
-          prop="extendName"
-          key="extendName"
+          prop="userName"
+          key="userName"
           :sort-by="['isDir', 'extendName']"
           sortable
           show-overflow-tooltip
-          v-if="selectedColumnList.includes('extendName') && screenWidth > 768"
+          v-if="selectedColumnList.includes('userName') && screenWidth > 768"
       >
         <template slot-scope="scope">
-          <span>{{ $file.getFileType(scope.row) }}</span>
+          <span>{{ scope.row.userName }}</span>
         </template>
       </el-table-column>
 			<el-table-column
@@ -233,7 +233,7 @@
 					<div>
 						<i
 							class="el-icon-warning"
-							v-if="$file.getFileShareStatus(scope.row.endTime)"
+							v-if="$publicbean.getFileShareStatus(scope.row.endTime)"
 						></i>
 						<i class="el-icon-time" v-else></i>
 						{{ scope.row.endTime }}
@@ -260,6 +260,7 @@
 
 <script>
 import { mapGetters } from 'vuex'
+import $publicbean from "@/libs/globalFunction/public";
 
 export default {
 	name: 'FileTablePub',
@@ -292,6 +293,9 @@ export default {
 		}
 	},
 	computed: {
+    $publicbean() {
+      return $publicbean
+    },
 		//  selectedColumnList: 判断当前用户设置的左侧栏是否折叠
 		...mapGetters(['selectedColumnList']),
 		// 路由名称
@@ -348,7 +352,7 @@ export default {
 			if (this.screenWidth > 768) {
 				event.preventDefault()
 				this.$refs.multipleTable.setCurrentRow(row) //  选中当前行
-				this.$openBox
+				this.$openBox2
 					.contextMenu({
 						selectedFile: row,
 						domEvent: event
@@ -385,7 +389,7 @@ export default {
 		 */
 		handleClickMore(row, event) {
 			this.$refs.multipleTable.setCurrentRow(row) //  选中当前行
-			this.$openBox
+			this.$openBox2
 				.contextMenu({
 					selectedFile: row,
 					domEvent: event

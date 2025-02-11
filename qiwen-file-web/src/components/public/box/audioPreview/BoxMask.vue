@@ -77,7 +77,7 @@
 							></i>
 							<a
 								class="download"
-								:href="$file.getDownloadFilePath(item)"
+								:href="$publicbean.getDownloadFilePath(item)"
 								target="_blank"
 								title="下载"
 							>
@@ -97,7 +97,7 @@
 								"
 							></i>
 							<span class="audio-size">{{
-								$file.calculateFileSize(item.fileSize)
+								$publicbean.calculateFileSize(item.fileSize)
 							}}</span>
 							<span class="path">{{ item.filePath }}</span>
 						</li>
@@ -185,7 +185,7 @@
 					></i>
 					<a
 						class="operate-icon download-link"
-						:href="$file.getDownloadFilePath(activeFileObj)"
+						:href="$publicbean.getDownloadFilePath(activeFileObj)"
 						target="_blank"
 						title="下载"
 					>

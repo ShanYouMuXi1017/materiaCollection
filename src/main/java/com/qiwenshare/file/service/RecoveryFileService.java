@@ -6,9 +6,11 @@ import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.qiwenshare.file.api.IRecoveryFileService;
 import com.qiwenshare.file.component.FileDealComp;
+import com.qiwenshare.file.domain.PublicFile;
 import com.qiwenshare.file.domain.RecoveryFile;
 import com.qiwenshare.file.domain.UserFile;
 import com.qiwenshare.file.io.QiwenFile;
+import com.qiwenshare.file.mapper.PublicFileMapper;
 import com.qiwenshare.file.mapper.RecoveryFileMapper;
 import com.qiwenshare.file.mapper.UserFileMapper;
 import com.qiwenshare.file.vo.file.RecoveryFileListVo;
@@ -26,11 +28,22 @@ import java.util.List;
 public class RecoveryFileService  extends ServiceImpl<RecoveryFileMapper, RecoveryFile> implements IRecoveryFileService {
     @Resource
     UserFileMapper userFileMapper;
+
+    @Resource
+    PublicFileMapper publicFileMapper;
     @Resource
     RecoveryFileMapper recoveryFileMapper;
     @Resource
     FileDealComp fileDealComp;
 
+
+    @Override
+    public void deletePublicFileByDeleteBatchNum(String deleteBatchNum) {
+
+        LambdaQueryWrapper<PublicFile> userFileLambdaQueryWrapper = new LambdaQueryWrapper<>();
+        userFileLambdaQueryWrapper.eq(PublicFile::getDeleteBatchNum, deleteBatchNum);
+        publicFileMapper.delete(userFileLambdaQueryWrapper);
+    }
 
     @Override
     public void deleteUserFileByDeleteBatchNum(String deleteBatchNum) {
@@ -39,9 +52,6 @@ public class RecoveryFileService  extends ServiceImpl<RecoveryFileMapper, Recove
         LambdaQueryWrapper<UserFile> userFileLambdaQueryWrapper = new LambdaQueryWrapper<>();
         userFileLambdaQueryWrapper.eq(UserFile::getDeleteBatchNum, deleteBatchNum);
         userFileMapper.delete(userFileLambdaQueryWrapper);
-
-
-
     }
 
     @Override

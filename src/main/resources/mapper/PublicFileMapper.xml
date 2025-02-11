@@ -7,9 +7,16 @@
 <mapper namespace="com.qiwenshare.file.mapper.PublicFileMapper">
 
     <select id="selectPageVo" parameterType="com.qiwenshare.file.domain.PublicFile" resultType="com.qiwenshare.file.vo.file.FileListVO">
-        select * from publicfile a
-        left join image on a.fileId = image.fileId
-        left join public on public.fileId = a.fileId
+        select
+        a.*,
+        p.fileSize,
+        u.username as userName,
+        i.imageWidth,
+        i.imageHeight
+        from publicfile a
+        left join image i on a.fileId = i.fileId
+        left join public p on p.fileId = a.fileId
+        left join user u on a.createUserId = u.userId
         <where>
             <if test="fileTypeId != null">
                 <choose>
@@ -22,9 +29,6 @@
                 </choose>
                 and a.isDir = 0
             </if>
-<!--            <if test="userFile.userId != null">-->
-<!--                and a.userId = #{userFile.userId}-->
-<!--            </if>-->
             <if test="userFile.filePath != null">
                 and a.filePath = #{userFile.filePath}
             </if>
