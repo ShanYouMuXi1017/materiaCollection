@@ -68,13 +68,13 @@
 					v-for="(item, index) in imgList"
 					:key="index"
 					:class="{ active: activeIndex === index }"
-					:title="$file.getFileNameComplete(item)"
+					:title="$publicbean.getFileNameComplete(item)"
 					ref="minImgRef"
 					@click="activeIndex = index"
 				>
 					<img
 						class="min-img"
-						:src="$file.setFileImg(item)"
+						:src="$publicbean.setFileImg(item)"
 						:alt="`${item.fileName} 缩略图`"
 					/>
 				</li>
@@ -146,7 +146,7 @@ export default {
 			return this.imgList[this.activeIndex]
 		},
 		activeImageName() {
-			return this.$file.getFileNameComplete(this.activeImage)
+			return this.$publicbean.getFileNameComplete(this.activeImage)
 		},
 		imageHeight() {
 			return this.activeImage.imageHeight

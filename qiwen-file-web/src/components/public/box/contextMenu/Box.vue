@@ -11,7 +11,7 @@
 		>
 			<li
 				class="right-menu-item"
-				@click="$file.handleFileNameClick(selectedFile, 0, [selectedFile])"
+				@click="$publicbean.handleFileNameClick(selectedFile, 0, [selectedFile])"
 				v-if="seeBtnShow"
 			>
 				<i class="el-icon-view"></i> 查看
@@ -51,13 +51,13 @@
 			>
 				<i class="el-icon-edit-outline"></i> 重命名
 			</li>
-			<li
-				class="right-menu-item"
-				@click="handleShareFileBtnClick(selectedFile)"
-				v-if="shareBtnShow"
-			>
-				<i class="el-icon-share"></i> 分享
-			</li>
+			<!--<li-->
+			<!--	class="right-menu-item"-->
+			<!--	@click="handleShareFileBtnClick(selectedFile)"-->
+			<!--	v-if="shareBtnShow"-->
+			<!--&gt;-->
+			<!--	<i class="el-icon-share"></i> 分享-->
+			<!--</li>-->
 			<li
 				class="right-menu-item"
 				@click="visible = false"
@@ -66,7 +66,7 @@
 				<a
 					target="_blank"
 					style="display: block; color: inherit"
-					:href="$file.getDownloadFilePath(selectedFile)"
+					:href="$publicbean.getDownloadFilePath(selectedFile)"
 					:download="selectedFile.fileName + '.' + selectedFile.extendName"
 				>
 					<i class="el-icon-download"></i> 下载
@@ -118,7 +118,7 @@
 			<li
 				class="right-menu-item"
 				@click="
-					$file.copyShareLink(
+					$publicbean.copyShareLink(
 						selectedFile.shareBatchNum,
 						selectedFile.extractionCode
 					)
@@ -439,7 +439,8 @@ export default {
 				.deleteFile({
 					isBatchOperation: false,
 					fileInfo,
-					deleteMode: this.fileType === 6 ? 2 : 1 //  删除类型：1-删除到回收站 2-彻底删除
+					// deleteMode: this.fileType === 6 ? 2 : 1 //  删除类型：1-删除到回收站 2-彻底删除
+					deleteMode: 2 //  删除类型：1-删除到回收站 2-彻底删除
 				})
 				.then((res) => {
 					this.callback(res)
@@ -509,7 +510,7 @@ export default {
 		handleClickFileEdit(fileInfo) {
 			if (this.officeFileType.includes(fileInfo.extendName)) {
 				// office 编辑页面
-				this.$file.getFileOnlineEditPathByOffice(fileInfo)
+				this.$publicbean.getFileOnlineEditPathByOffice(fileInfo)
 			} else if (this.markdownFileType.includes(fileInfo.extendName)) {
 				// markdown 编辑浮层
 				this.$openBox2.markdownPreview({

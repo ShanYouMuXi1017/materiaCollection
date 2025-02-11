@@ -64,14 +64,14 @@
             <span slot="title">其他</span>
           </el-menu-item>
         </el-submenu>
-        <el-menu-item
-            index="6"
-            :route="{ name: 'Public', query: { fileType: 6 } }"
-            class="recovery"
-        >
-          <i class="el-icon-delete"></i>
-          <span slot="title">回收站</span>
-        </el-menu-item>
+        <!--<el-menu-item-->
+        <!--    index="6"-->
+        <!--    :route="{ name: 'Public', query: { fileType: 6 } }"-->
+        <!--    class="recovery"-->
+        <!--&gt;-->
+        <!--  <i class="el-icon-delete"></i>-->
+        <!--  <span slot="title">回收站</span>-->
+        <!--</el-menu-item>-->
         <!--<el-menu-item-->
         <!--    index="8"-->
         <!--    :route="{ name: 'Public', query: { fileType: 8, filePath: '/' } }"-->
@@ -95,12 +95,12 @@
         <div class="text" v-show="!isCollapse">
           <span class="label">存储</span>
           <span>
-						{{ $file.calculateFileSize(storageValue) }} /
-						{{ $file.calculateFileSize(totalStorageValue) }}
+						{{ $publicbean.calculateFileSize(storageValue) }} /
+						{{ $publicbean.calculateFileSize(totalStorageValue) }}
 					</span>
         </div>
         <div class="text" v-show="isCollapse">
-          <span>{{ $file.calculateFileSize(storageValue) }}</span>
+          <span>{{ $publicbean.calculateFileSize(storageValue) }}</span>
         </div>
       </div>
     </el-drawer>
@@ -162,14 +162,14 @@
             <span slot="title">其他</span>
           </el-menu-item>
         </el-submenu>
-        <el-menu-item
-            index="6"
-            :route="{ name: 'Public', query: { fileType: 6 } }"
-            class="recovery"
-        >
-          <i class="el-icon-delete"></i>
-          <span slot="title">回收站</span>
-        </el-menu-item>
+        <!--<el-menu-item-->
+        <!--    index="6"-->
+        <!--    :route="{ name: 'Public', query: { fileType: 6 } }"-->
+        <!--    class="recovery"-->
+        <!--&gt;-->
+        <!--  <i class="el-icon-delete"></i>-->
+        <!--  <span slot="title">回收站</span>-->
+        <!--</el-menu-item>-->
         <!--<el-menu-item-->
         <!--    index="8"-->
         <!--    :route="{ name: 'Public', query: { fileType: 8, filePath: '/' } }"-->
@@ -193,12 +193,12 @@
         <div class="text" v-show="!isCollapse">
           <span class="label">存储</span>
           <span
-          >{{ $file.calculateFileSize(storageValue) }} /
-						{{ $file.calculateFileSize(totalStorageValue) }}</span
+          >{{ $publicbean.calculateFileSize(storageValue) }} /
+						{{ $publicbean.calculateFileSize(totalStorageValue) }}</span
           >
         </div>
         <div class="text" v-show="isCollapse">
-          <span>{{ $file.calculateFileSize(storageValue) }}</span>
+          <span>{{ $publicbean.calculateFileSize(storageValue) }}</span>
         </div>
       </div>
     </template>
@@ -229,7 +229,7 @@ export default {
   data() {
     return {
       isDrawer: false, //  控制移动端菜单抽屉是否显示
-      isCollapse: false, //  控制菜单收缩展开
+      isCollapse: true, //  控制菜单收缩展开
       // 菜单 index 和名称 Map
       myFileMenuMap: {
         0: '全部',

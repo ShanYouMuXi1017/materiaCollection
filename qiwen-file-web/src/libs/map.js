@@ -85,6 +85,8 @@ export const markdownFileType = ['markdown', 'md']
  */
 export const allColumnList = [
 	'extendName',
+	'userId',
+	'userName',
 	'fileSize',
 	'uploadTime',
 	'deleteTime'

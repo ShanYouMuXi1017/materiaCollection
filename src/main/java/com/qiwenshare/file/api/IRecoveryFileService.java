@@ -9,6 +9,7 @@ import java.util.List;
 
 public interface IRecoveryFileService extends IService<RecoveryFile> {
     void deleteUserFileByDeleteBatchNum(String deleteBatchNum);
+    void deletePublicFileByDeleteBatchNum(String deleteBatchNum);
     void restorefile(String deleteBatchNum, String filePath, String sessionUserId);
     List<RecoveryFileListVo> selectRecoveryFileList(String userId);
 }

@@ -103,6 +103,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                         "/user/checkuserlogininfo",
                         "/filetransfer/downloadfile",
                         "/filetransfer/preview",
+                        "/publictransfer/downloadfile",
+                        "/publictransfer/preview",
                         "/share/sharefileList",
                         "/share/sharetype",
                         "/share/checkextractioncode",

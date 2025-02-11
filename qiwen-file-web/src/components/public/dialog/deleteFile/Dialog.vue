@@ -7,8 +7,10 @@
 		width="550px"
 		@close="handleDialogClose"
 	>
-		<div v-if="deleteMode === 1">删除后可在回收站查看, 是否继续删除？</div>
-		<div v-else-if="deleteMode === 2">此操作将永久删除该文件, 是否继续？</div>
+		<!--<div v-if="deleteMode === 1">删除后可在回收站查看, 是否继续删除？</div>-->
+		<!--<div v-else-if="deleteMode === 2">此操作将永久删除该文件, 是否继续？</div>-->
+    <!--<div v-if="deleteMode === 1">删除后可在回收站查看, 是否继续删除？</div>-->
+    <div>此操作将永久删除该文件, 是否继续？</div>
 		<div slot="footer" class="dialog-footer">
 			<el-button @click="handleDialogClose">取 消</el-button>
 			<el-button
@@ -24,9 +26,9 @@
 <script>
 import {
 	batchDeleteFile,
-	batchDeleteRecoveryFile,
+	// batchDeleteRecoveryFile,
 	deleteFile,
-	deleteRecoveryFile
+	// deleteRecoveryFile
 } from '_r/public.js'
 
 export default {
@@ -56,9 +58,9 @@ export default {
 			// 批量删除模式
 			if (this.isBatchOperation) {
 				// 区分删除类型
-				switch (this.deleteMode) {
-					// 删除文件到回收站
-					case 1: {
+				// switch (this.deleteMode) {
+				// 	// 删除文件到回收站
+				// 	case 1: {
 						res = await batchDeleteFile({
 							userFileIds: this.fileInfo
 								.map((item) => {
@@ -66,39 +68,39 @@ export default {
 								})
 								.join(',')
 						})
-						break
-					}
+					// 	break
+					// }
 					// 回收站中彻底删除
-					case 2: {
-						res = await batchDeleteRecoveryFile({
-							userFileIds: this.fileInfo
-								.map((item) => {
-									return item.userFileId
-								})
-								.join(',')
-						})
-						break
-					}
-				}
+				// 	case 2: {
+				// 		res = await batchDeleteRecoveryFile({
+				// 			userFileIds: this.fileInfo
+				// 				.map((item) => {
+				// 					return item.userFileId
+				// 				})
+				// 				.join(',')
+				// 		})
+				// 		break
+				// 	}
+				// }
 			} else {
 				// 单文件删除模式
 				// 区分删除类型
-				switch (this.deleteMode) {
-					// 删除文件到回收站
-					case 1: {
+				// switch (this.deleteMode) {
+				// 	// 删除文件到回收站
+				// 	case 1: {
 						res = await deleteFile({
 							userFileId: this.fileInfo.userFileId
 						})
-						break
-					}
+				// 		break
+				// 	}
 					// 回收站中彻底删除
-					case 2: {
-						res = await deleteRecoveryFile({
-							userFileId: this.fileInfo.userFileId
-						})
-						break
-					}
-				}
+					// case 2: {
+					// 	res = await deleteRecoveryFile({
+					// 		userFileId: this.fileInfo.userFileId
+					// 	})
+					// 	break
+					// }
+				// }
 			}
 			if (res.success) {
 				this.sureBtnLoading = false

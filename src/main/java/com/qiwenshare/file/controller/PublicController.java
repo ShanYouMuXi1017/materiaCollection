@@ -27,8 +27,10 @@ import com.qiwenshare.file.domain.FileBean;
 import com.qiwenshare.file.domain.PublicBean;
 import com.qiwenshare.file.domain.PublicFile;
 
+import com.qiwenshare.file.domain.user.UserBean;
 import com.qiwenshare.file.dto.file.*;
 import com.qiwenshare.file.io.QiwenFile;
+import com.qiwenshare.file.service.UserService;
 import com.qiwenshare.file.util.QiwenFileUtil;
 import com.qiwenshare.file.util.QiwenPublicUtil;
 import com.qiwenshare.file.util.TreeNode;
@@ -69,10 +71,10 @@ import java.util.regex.Pattern;
 public class PublicController {
 
     // 公共文件操作的路径
-    @Value("${ufop.local-storage-path}")
-    private String localStoragePath;
-    @Value("${ufop.bucket-name-pub}")
-    private String bucketNamePub;
+    //@Value("${ufop.local-storage-path}")
+    //private String localStoragePath;
+    //@Value("${ufop.bucket-name-pub}")
+    //private String bucketNamePub;
 
 
     @Resource
@@ -302,8 +304,6 @@ public class PublicController {
             //@Parameter(description = "当前页", required = true) long currentPage,
             //@Parameter(description = "页面数量", required = true) long pageCount
     ){
-        System.out.println("文件类型:"+fileType);
-        System.out.println("文件路径:"+filePath);
         if ("0".equals(fileType)) {
             // 0 是文件夹
             List<FileListVO> fileList = publicFileService.userFileList(null, filePath/*, currentPage, pageCount*/);
@@ -327,9 +327,11 @@ public class PublicController {
         for (String userFileId : userFileIdList) {
             executor.execute(()->{
                 publicFileService.deleteUserFile(userFileId, SessionUtil.getUserId());
+
+                asyncTaskComp.deletePublicFile(userFileId);
             });
 
-            fileDealComp.deleteESByUserFileId(userFileId);
+            //fileDealComp.deleteESByUserFileId(userFileId);
         }
 
         return RestResult.success().message("批量删除文件成功");
@@ -343,7 +345,10 @@ public class PublicController {
 
         JwtUser sessionUserBean =  SessionUtil.getSession();
         publicFileService.deleteUserFile(deleteFileDto.getUserFileId(), sessionUserBean.getUserId());
-        fileDealComp.deleteESByUserFileId(deleteFileDto.getUserFileId());
+
+        asyncTaskComp.deletePublicFile(deleteFileDto.getUserFileId());
+
+        //fileDealComp.deleteESByUserFileId(deleteFileDto.getUserFileId());
 
         return RestResult.success();
 
@@ -539,11 +544,11 @@ public class PublicController {
     }
 
 
-    @Operation(summary = "查询公共区域地址", description = "查询公共区域地址", tags = {"file"})
-    @RequestMapping(value = "/getpublicurl", method = RequestMethod.GET)
-    @ResponseBody
-    public RestResult<String> queryPublicUrl(){
-        return RestResult.success().data(localStoragePath+"/"+bucketNamePub);
-    }
+    //@Operation(summary = "查询公共区域地址", description = "查询公共区域地址", tags = {"file"})
+    //@RequestMapping(value = "/getpublicurl", method = RequestMethod.GET)
+    //@ResponseBody
+    //public RestResult<String> queryPublicUrl(){
+    //    return RestResult.success().data(localStoragePath+"/"+bucketNamePub);
+    //}
 
 }

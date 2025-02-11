@@ -34,7 +34,9 @@ export default new Vuex.Store({
 		gridSize: (state) => state.fileList.gridSize,
 		// 剩余存储空间
 		remainderStorageValue: (state) =>
-			state.sideMenu.totalStorageValue - state.sideMenu.storageValue
+			state.sideMenu.totalStorageValue - state.sideMenu.storageValue,
+		free:(state)=>
+			state.sideMenuPublic.total - state.sideMenuPublic.used
 	},
 	mutations: {
 		//

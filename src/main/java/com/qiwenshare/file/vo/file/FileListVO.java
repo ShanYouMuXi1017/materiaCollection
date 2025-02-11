@@ -23,6 +23,8 @@ public class FileListVO {
 
     private Long userId;
 
+    private String userName;
+
 
     private String fileName;
 

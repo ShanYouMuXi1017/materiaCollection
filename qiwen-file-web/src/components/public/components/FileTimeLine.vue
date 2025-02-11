@@ -27,18 +27,18 @@
 						v-for="(image, imageIndex) in item.imageList"
 						:key="`${index}-${imageIndex}`"
 						:style="`width: ${gridSize + 40}px; `"
-						@click="$file.handleImgPreview(imageIndex, {}, item.imageList)"
+						@click="$publicbean.handleImgPreview(imageIndex, {}, item.imageList)"
 						@contextmenu.prevent="handleContextMenu(item, imageIndex, $event)"
 					>
 						<img
 							class="image"
-							:src="$file.getMinImgStream(image)"
-							:alt="$file.getFileNameComplete(image)"
+							:src="$publicbean.getMinImgStream(image)"
+							:alt="$publicbean.getFileNameComplete(image)"
 							:style="`width: ${gridSize}px; height: ${gridSize}px;`"
 						/>
 						<div
 							class="image-name"
-							v-html="$file.getFileNameComplete(image, true)"
+							v-html="$publicbean.getFileNameComplete(image, true)"
 						></div>
 					</li>
 				</ul>

@@ -146,10 +146,6 @@ export default {
   created() {
     // this.setPageCount()
     this.getTableDataByType()
-    console.log("===========");
-    console.log(this.filePath);
-    console.log("===========");
-    console.log(this.fileType);
   },
   methods: {
     /**
@@ -223,13 +219,7 @@ export default {
         // currentPage: this.pageData.currentPage,
         // pageCount: this.pageData.pageCount
       }
-      console.log("2222222");
-      console.log(this.filePath);
-      console.log("2222222");
-      console.log(this.fileType);
       getFileListByPath(data).then((res) => {
-        console.log("返回个数");
-        console.log(res);
         if (res.success) {
           this.fileList = res.dataList
           // this.pageData.total = Number(res.total)
@@ -320,8 +310,6 @@ export default {
       }).then((res) => {
         this.loading = false
         if (res.success) {
-          console.log("过来");
-          console.log(res);
           this.fileList = res.dataList/*.map((item) => {
             return {
               ...item,
